@@ -1,0 +1,702 @@
+<!doctype html>
+
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MyDiary V3 - Personal Memory Journal</title>
+
+    <!-- Google Fonts -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Caveat:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Icons -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
+    />
+
+    <link rel="stylesheet" href="styles.css" />
+
+  </head>
+
+  <body>
+    <!-- ========================================================= -->
+
+    <!-- BACKGROUND BLOBS -->
+
+    <!-- ========================================================= -->
+
+    <div class="bg-blob blob-1"></div>
+    <div class="bg-blob blob-2"></div>
+    <div class="bg-blob blob-3"></div>
+
+    <!-- ========================================================= -->
+
+    <!-- AUTH SCREEN -->
+
+    <!-- ========================================================= -->
+
+    <section id="authScreen">
+       
+      <div class="auth-container">
+        <div class="auth-card glass">
+          <div class="auth-logo">📖</div>
+
+          <h1>MyDiary</h1>
+
+          <p class="auth-subtitle">Your Personal Memory Journal</p>
+
+          <form id="loginForm">
+            <div class="input-group">
+              <label>Password</label>
+
+              <input
+                type="password"
+                id="loginPassword"
+                placeholder="Enter your diary password"
+              />
+            </div>
+
+            <div class="remember-row">
+              <label class="remember-label">
+                <input type="checkbox" id="rememberMe" />
+                Remember Me
+              </label>
+            </div>
+
+            <button type="submit" class="primary-btn auth-btn">
+              Unlock Journal
+            </button>
+          </form>
+
+          <div class="first-time-setup">
+            <p>First time here?</p>
+
+            <button id="createPasswordBtn" class="secondary-btn">
+              Create Password
+            </button>
+          </div>
+        </div>
+      </div>
+       
+    </section>
+
+    <!-- ========================================================= -->
+
+    <!-- APP SHELL -->
+
+    <!-- ========================================================= -->
+
+    <div id="appShell" hidden>
+       
+      <!-- ===================================================== -->
+      <!-- SIDEBAR -->
+      <!-- ===================================================== -->
+
+      <aside class="sidebar glass">
+        <div class="sidebar-top">
+          <div class="brand">
+            <div class="brand-icon">📖</div>
+
+            <div>
+              <h2>MyDiary</h2>
+              <span>Memory Journal</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Navigation -->
+
+        <nav class="sidebar-nav">
+          <button class="nav-item active">
+            <i class="fa-solid fa-book-open"></i>
+            <span>Diary</span>
+          </button>
+
+          <button class="nav-item">
+            <i class="fa-solid fa-calendar"></i>
+            <span>Calendar</span>
+          </button>
+
+          <button class="nav-item">
+            <i class="fa-solid fa-star"></i>
+            <span>Favorites</span>
+          </button>
+
+          <button class="nav-item">
+            <i class="fa-solid fa-trash"></i>
+            <span>Trash</span>
+          </button>
+
+          <button class="nav-item">
+            <i class="fa-solid fa-gear"></i>
+            <span>Settings</span>
+          </button>
+        </nav>
+
+        <div class="sidebar-divider"></div>
+
+        <!-- Journals -->
+
+        <div class="journal-section">
+          <h4>📚 Journals</h4>
+
+          <div class="journal-pills">
+            <button class="journal-pill active" data-journal="personal">
+              🌸 Personal
+            </button>
+
+            <button class="journal-pill" data-journal="work">💼 Work</button>
+
+            <button class="journal-pill" data-journal="travel">
+              ✈️ Travel
+            </button>
+
+            <button class="journal-pill" data-journal="study">📚 Study</button>
+
+            <button class="journal-pill" data-journal="dream">🌙 Dreams</button>
+          </div>
+        </div>
+
+        <div class="sidebar-divider"></div>
+
+        <!-- Quick Stats -->
+
+        <div class="quick-stats">
+          <div class="stat-card">
+            <span class="stat-label"> Entries </span>
+
+            <span id="entryCount"> 0 </span>
+          </div>
+
+          <div class="stat-card">
+            <span class="stat-label"> Streak </span>
+
+            <span id="streakCount"> 0🔥 </span>
+          </div>
+        </div>
+        <div class="backup-section">
+
+    <button id="exportJSONBtn">
+        Export Backup
+    </button>
+
+    <button id="importJSONBtn">
+        Import Backup
+    </button>
+
+    <input
+        type="file"
+        id="importJSONFile"
+        hidden
+        accept=".json"
+    />
+
+</div>
+      </aside>
+
+      <!-- ===================================================== -->
+      <!-- MAIN CONTENT -->
+      <!-- ===================================================== -->
+
+      <main class="main-content">
+        <!-- =============================================== -->
+        <!-- PERSONAL JOURNAL WORKSPACE -->
+        <!-- =============================================== -->
+
+        <section id="personalWorkspace" class="workspace active-workspace">
+          <!-- Welcome -->
+
+          <div class="hero-grid">
+            <div class="welcome-card glass">
+              <h1>Welcome Back 🌸</h1>
+
+              <p>Capture today's memories beautifully.</p>
+            </div>
+
+            <div class="quote-card glass">
+              <h3>Quote of the Day</h3>
+
+              <p id="dailyQuote">Every memory matters.</p>
+            </div>
+
+            <div class="streak-card glass">
+              <h3>Memory Streak</h3>
+
+              <h2 id="memoryStreak">0 Days</h2>
+            </div>
+          </div>
+
+          <!-- Notebook Editor -->
+
+          <section class="editor-section glass">
+            <div class="editor-header">
+              <div>
+                <h2>Journal Entry</h2>
+
+                <p id="currentDate">June 18, 2026</p>
+              </div>
+
+              <div class="entry-meta">
+                <select id="moodSelect">
+                  <option value="Happy">😊 Happy</option>
+
+                  <option value="Calm">😌 Calm</option>
+
+                  <option value="Reflective">🤔 Reflective</option>
+
+                  <option value="Productive">🚀 Productive</option>
+                </select>
+
+                <select id="weatherSelect">
+                  <option>☀️ Sunny</option>
+                  <option>🌧 Rainy</option>
+                  <option>☁️ Cloudy</option>
+                  <option>🌙 Night</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Toolbar -->
+
+            <div class="toolbar">
+              <button data-command="bold">Bold</button>
+
+              <button data-command="italic">Italic</button>
+
+              <button data-command="underline">Underline</button>
+
+              <span class="toolbar-divider"></span>
+
+              <button data-command="h1">H1</button>
+
+              <button data-command="h2">H2</button>
+
+              <button data-command="quote">Quote</button>
+
+              <span class="toolbar-divider"></span>
+
+              <button data-command="checklist">Checklist</button>
+
+              <button data-command="bullet">Bullets</button>
+
+              <span class="toolbar-divider"></span>
+
+              <button id="imageBtn">🖼 Image</button>
+
+              <button id="voiceBtn">🎤 Voice</button>
+              <span class="toolbar-divider"></span>
+
+<button id="stickerBtn">
+🎀 Sticker
+</button>
+
+<button id="tapeBtn">
+📌 Tape
+</button>
+
+<button id="doodleBtn">
+⭐ Doodle
+</button>
+
+<button id="polaroidBtn">
+📷 Polaroid
+</button>
+            </div>
+
+            <!-- Title -->
+
+            <input
+              type="text"
+              id="entryTitle"
+              placeholder="Give your memory a title..."
+            />
+
+            <!-- Quote -->
+
+            <input
+              type="text"
+              id="entryQuote"
+              placeholder="Personal quote or thought..."
+            />
+
+            <!-- Notebook -->
+
+            <div class="notebook-wrapper">
+              <div class="paper-tape tape-left"></div>
+              <div class="paper-tape tape-right"></div>
+
+              <div
+                id="editor"
+                contenteditable="true"
+                class="notebook-editor"
+              ></div>
+            </div>
+
+            <!-- Image Preview -->
+
+            <div id="imagePreviewContainer"></div>
+
+            <input type="file" id="imageUpload" accept="image/*" hidden />
+
+            <!-- Writing Status -->
+
+            <div class="writing-status">
+              <span id="wordCount"> 0 Words </span>
+
+              <span id="charCount"> 0 Characters </span>
+
+              <span id="readingTime"> 0 Min Read </span>
+
+              <span id="saveStatus"> Draft Saved </span>
+            </div>
+
+            <!-- Actions -->
+
+            <div class="editor-actions">
+              <button id="saveEntryBtn" class="primary-btn">Save Memory</button>
+
+              <button id="clearEntryBtn" class="secondary-btn">Clear</button>
+              <button
+    id="exportPDFBtn"
+    class="secondary-btn">
+    Export PDF
+</button>
+            </div>
+          </section>
+
+          <!-- Mood Tracker -->
+
+          <section class="glass mood-section">
+            <h2>Today's Mood</h2>
+
+            <div class="mood-grid">
+              <div class="mood-item">😊</div>
+              <div class="mood-item">😌</div>
+              <div class="mood-item">🥰</div>
+              <div class="mood-item">🤔</div>
+              <div class="mood-item">😴</div>
+            </div>
+          </section>
+
+          <!-- Memory Feed -->
+
+          <section class="feed-section">
+            <div class="section-header">
+              <h2>Memory Feed</h2>
+
+              <input
+                type="text"
+                id="searchInput"
+                placeholder="Search memories..."
+              />
+            </div>
+
+            <div id="memoryFeed" class="masonry-feed">
+              <!-- Cards Rendered Here -->
+            </div>
+
+            <div id="emptyState" class="empty-state">
+              <h2>✨ No memories yet</h2>
+
+              <p>Start your first journal entry.</p>
+            </div>
+          </section>
+
+          <!-- Scrapbook -->
+
+          <section class="glass scrapbook-board">
+            <h2>Scrapbook Board</h2>
+
+            <div id="scrapbookGrid"></div>
+          </section>
+
+          <!-- Analytics -->
+
+          <section class="glass analytics-section">
+
+    <h2>Mood Analytics</h2>
+
+    <div class="analytics-grid">
+
+        <div class="analytics-card">
+            <h3>Total Entries</h3>
+            <span id="totalEntriesCard">0</span>
+        </div>
+
+        <div class="analytics-card">
+            <h3>Most Used Mood</h3>
+            <span id="mostUsedMood">Happy</span>
+        </div>
+
+        <div class="analytics-card">
+            <h3>Words Written</h3>
+            <span id="totalWordsCard">0</span>
+        </div>
+
+        <div class="analytics-card">
+            <h3>Writing Streak</h3>
+            <span id="writingStreakCard">0</span>
+        </div>
+
+    </div>
+
+    <div class="chart-wrapper">
+        <canvas id="moodChart"></canvas>
+    </div>
+
+</section>
+<section id="habitTracker" class="glass dashboard-section">
+
+    <div class="section-header">
+        <h2>🔥 Habit Tracker</h2>
+    </div>
+
+    <div id="habitGrid"></div>
+
+</section>
+<section id="heatmapSection" class="glass dashboard-section">
+
+    <div class="section-header">
+        <h2>📈 Monthly Activity Heatmap</h2>
+    </div>
+
+    <div id="heatmapGrid"></div>
+
+</section>
+<!-- ===================================================== -->
+<!-- CALENDAR VIEW -->
+<!-- ===================================================== -->
+
+<section id="calendarView" class="glass dashboard-section">
+
+    <div class="section-header">
+        <h2>📅 Memory Calendar</h2>
+
+        <div class="calendar-controls">
+            <button id="prevMonthBtn">←</button>
+            <h3 id="calendarMonth">June 2026</h3>
+            <button id="nextMonthBtn">→</button>
+        </div>
+    </div>
+
+    <div id="calendarGrid"></div>
+
+</section>
+<section id="polaroidGallery" class="glass dashboard-section">
+
+    <div class="section-header">
+        <h2>📷 Photo Memories</h2>
+    </div>
+
+    <div id="galleryGrid"></div>
+
+</section>
+<section id="visionBoard" class="glass dashboard-section">
+
+    <div class="section-header">
+        <h2>🎯 Vision Board</h2>
+    </div>
+
+    <div id="visionBoardGrid"></div>
+
+</section>
+        <!-- =============================================== -->
+        <!-- WORK JOURNAL -->
+        <!-- =============================================== -->
+
+        <section id="workWorkspace" class="workspace">
+          <div class="workspace-hero work-theme">
+            <div id="taskManager"></div>
+
+    <div id="projectBoard"></div>
+
+    <div id="meetingNotes"></div>
+
+    <div id="deadlinesBoard"></div>
+
+    <div id="productivityChart"></div>
+
+          </div>
+
+          <div class="workspace-placeholder">
+            Task Manager Projects Meeting Notes Deadlines Analytics
+          </div>
+        </section>
+
+        <!-- =============================================== -->
+        <!-- TRAVEL JOURNAL -->
+        <!-- =============================================== -->
+
+        <section id="travelWorkspace" class="workspace">
+          <div class="workspace-hero travel-theme">
+               <div id="travelStories"></div>
+
+    <div id="travelGallery"></div>
+
+    <div id="visitedPlaces"></div>
+
+    <div id="bucketList"></div>
+
+    <div id="travelTimeline"></div>
+        </section>
+
+        <!-- =============================================== -->
+        <!-- STUDY JOURNAL -->
+        <!-- =============================================== -->
+
+        <section id="studyWorkspace" class="workspace">
+          <div class="workspace-hero study-theme">
+             <div id="subjectsBoard"></div>
+
+    <div id="flashcardsBoard"></div>
+
+    <div id="studyProgress"></div>
+
+    <div id="revisionPlanner"></div>
+
+    <div id="interviewPrep"></div>
+</div>
+
+          <div class="workspace-placeholder">
+            Subjects Flashcards Study Progress Revision Planner Interview Prep
+          </div>
+        </section>
+
+        <!-- =============================================== -->
+        <!-- DREAM JOURNAL -->
+        <!-- =============================================== -->
+
+        <section id="dreamWorkspace" class="workspace">
+          <div class="workspace-hero dream-theme">
+          <div id="dreamEntries"></div>
+
+    <div id="dreamSymbols"></div>
+
+    <div id="dreamAnalytics"></div>
+
+    <div id="interpretationBoard"></div>
+
+    <div id="moonCalendar"></div>
+          </div>
+
+          <div class="workspace-placeholder">
+            Dream Entries Symbols Interpretations Analytics
+          </div>
+        </section>
+        <section
+    id="settingsPanel"
+    class="workspace">
+
+    <div class="glass settings-card">
+
+        <h1>⚙ Settings</h1>
+
+        <div class="settings-group">
+
+            <h3>Security</h3>
+
+            <input
+                type="password"
+                id="currentPassword"
+                placeholder="Current Password"
+            />
+
+            <input
+                type="password"
+                id="newPassword"
+                placeholder="New Password"
+            />
+
+            <input
+                type="password"
+                id="confirmPassword"
+                placeholder="Confirm Password"
+            />
+
+            <button
+                id="changePasswordBtn">
+                Change Password
+            </button>
+
+        </div>
+
+        <div class="settings-group">
+
+            <h3>Appearance</h3>
+
+            <button id="themeToggleBtn">
+                Toggle Theme
+            </button>
+
+        </div>
+
+    </div>
+
+</section>
+      </main>
+       
+    </div>
+
+    <!-- ========================================================= -->
+
+    <!-- MEMORY MODAL -->
+
+    <!-- ========================================================= -->
+
+    <div id="memoryModal" class="modal">
+       
+      <div class="modal-content glass">
+        <button id="closeModal">✕</button>
+
+        <div id="modalBody"></div>
+      </div>
+       
+    </div>
+
+    <!-- ========================================================= -->
+
+    <!-- TOAST -->
+
+    <!-- ========================================================= -->
+
+    <div id="toastContainer"></div>
+
+    <!-- ========================================================= -->
+
+    <!-- LOADER -->
+
+    <!-- ========================================================= -->
+
+
+    <script src="script.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="modules/calendar.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="modules/indexeddb.js"></script>
+
+<script src="modules/calendar.js"></script>
+
+<script src="modules/pdf-export.js"></script>
+
+<script src="modules/mood-charts.js"></script>
+
+<script src="modules/password.js"></script>
+
+<script src="modules/dashboards.js"></script>
+
+<script src="modules/vision-board.js"></script>
+
+<script src="modules/habits.js"></script>
+
+<script src="modules/gallery.js"></script>
+
+<script src="modules/heatmap.js"></script>
+
+<script src="modules/scrapbook.js"></script>
+
+  </body>
+</html>
