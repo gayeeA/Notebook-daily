@@ -303,6 +303,12 @@ function logout(){
     location.reload();
 
 }
+document
+.getElementById("logoutBtn")
+?.addEventListener(
+    "click",
+    logout
+);
 
 /* ==========================================================
    JOURNAL SWITCHING
@@ -486,26 +492,6 @@ function loadRandomQuote(){
 }
 
 /* ==========================================================
-   ANALYTICS FOUNDATION
-========================================================== */
-
-function updateAnalytics(){
-
-    const entryCount =
-    document.getElementById(
-        "entryCount"
-    );
-
-    if(entryCount){
-
-        entryCount.textContent =
-        state.entries.length;
-
-    }
-
-}
-
-/* ==========================================================
    APP INIT
 ========================================================== */
 
@@ -514,7 +500,7 @@ function initializeApp(){
     updateDate();
 
     loadRandomQuote();
-
+    loadDraft();
     switchJournal(
         state.activeJournal
     );
@@ -1086,11 +1072,9 @@ if(SpeechRecognition){
     recognition =
     new SpeechRecognition();
 
-    recognition.continuous =
-    false;
+    recognition.continuous =true;
 
-    recognition.interimResults =
-    false;
+    recognition.interimResults = false;
 
     recognition.lang =
     "en-US";
@@ -1104,28 +1088,49 @@ if(SpeechRecognition){
 
     };
 
-    recognition.onresult =
-    (event)=>{
+let finalTranscript = "";
 
-        const transcript =
-        event.results[
-            event.results.length - 1
-        ][0].transcript;
+recognition.onresult = (event) => {
 
-        insertTextAtCursor(
-            transcript
-        );
+    let transcript = "";
 
-        setSaveStatus(
-            "✓ Voice Added"
-        );
+    for (
+        let i = event.resultIndex;
+        i < event.results.length;
+        i++
+    ) {
 
-        updateWritingStats();
+        const result =
+            event.results[i];
 
-        autoSaveDraft();
+        if (result.isFinal) {
 
-    };
+            transcript +=
+                result[0].transcript + " ";
 
+        }
+
+    }
+
+    transcript =
+        transcript.trim();
+
+    if (!transcript.length)
+        return;
+
+    insertTextAtCursor(
+        transcript
+    );
+
+    setSaveStatus(
+        "✓ Voice Added"
+    );
+
+    updateWritingStats();
+
+    autoSaveDraft();
+
+};
     recognition.onerror =
     ()=>{
 
@@ -1176,11 +1181,36 @@ function insertTextAtCursor(text){
 
     editor.focus();
 
-    document.execCommand(
-        "insertText",
-        false,
-        " " + text
+    const selection =
+        window.getSelection();
+
+    if (
+        !selection ||
+        selection.rangeCount === 0
+    ) {
+
+        editor.innerHTML +=
+            " " + text;
+
+        return;
+    }
+
+    const range =
+        selection.getRangeAt(0);
+
+    range.deleteContents();
+
+    range.insertNode(
+        document.createTextNode(
+            " " + text
+        )
     );
+
+    range.collapse(false);
+
+    selection.removeAllRanges();
+
+    selection.addRange(range);
 
 }
 
@@ -1391,7 +1421,7 @@ function validateEntry(){
 ========================================================== */
 
 function saveEntry(){
-
+    loadJournalEntries();
     if(!validateEntry())
         return;
 
@@ -2583,7 +2613,11 @@ document.addEventListener(
                 === "function"
             ){
 
-                saveEntry();
+               saveEntry();
+
+document.dispatchEvent(
+new Event("entrySaved")
+);
 
             }
 
@@ -2646,3 +2680,219 @@ window.MyDiary = {
 console.log(
     "📖 MyDiary V3 Loaded"
 );
+document
+.getElementById(
+    "exportDiaryPDF"
+)
+?.addEventListener(
+    "click",
+    () => {
+
+        MyDiaryPDF
+        .exportAllEntriesPDF();
+
+    }
+);
+
+document
+.getElementById(
+    "exportJournalPDF"
+)
+?.addEventListener(
+    "click",
+    () => {
+
+        MyDiaryPDF
+        .exportJournalPDF();
+
+    }
+);
+
+document
+.getElementById(
+    "exportFavoritesPDF"
+)
+?.addEventListener(
+    "click",
+    () => {
+
+        MyDiaryPDF
+        .exportFavoritesPDF();
+
+    }
+);
+document.querySelectorAll(".nav-item")
+.forEach(btn => {
+
+    btn.addEventListener("click", () => {
+
+        const view =
+            btn.dataset.view;
+
+        showView(view);
+
+    });
+
+});
+function showView(view){
+
+const sections = [
+
+"personalWorkspace",
+"calendarWorkspace",
+"favoritesWorkspace",
+"trashWorkspace",
+"settingsWorkspace"
+
+];
+
+sections.forEach(id=>{
+
+const el = document.getElementById(id);
+
+if(el){
+
+el.hidden = true;
+
+el.classList.remove("active-workspace");
+
+}
+
+});
+
+let target = null;
+
+switch(view){
+
+case "diary":
+target =
+document.getElementById(
+"personalWorkspace"
+);
+break;
+
+case "calendar":
+target =
+document.getElementById(
+"calendarWorkspace"
+);
+break;
+
+case "favorites":
+target =
+document.getElementById(
+"favoritesWorkspace"
+);
+break;
+
+case "trash":
+target =
+document.getElementById(
+"trashWorkspace"
+);
+break;
+
+case "settings":
+target =
+document.getElementById(
+"settingsWorkspace"
+);
+break;
+
+}
+
+if(target){
+
+target.hidden = false;
+
+target.classList.add(
+"active-workspace"
+);
+
+}
+
+}
+document
+.getElementById(
+"exportPDFBtn"
+)
+?.addEventListener(
+"click",
+()=>{
+
+if(
+window.MyDiaryPDF
+){
+
+MyDiaryPDF.exportCurrentEntry();
+
+}
+
+}
+);
+document
+.getElementById(
+"changePasswordBtn"
+)
+?.addEventListener(
+"click",
+()=>{
+
+if(
+window.MyDiaryPassword
+){
+
+MyDiaryPassword.changePassword();
+
+}
+
+}
+);
+function renderFavoritesPage(){
+
+const grid =
+document.getElementById(
+"favoritesGrid"
+);
+
+if(!grid) return;
+
+grid.innerHTML = "";
+
+state.entries
+.filter(
+e=>e.favorite && !e.trashed
+)
+.forEach(entry=>{
+
+grid.appendChild(
+createMemoryCard(entry)
+);
+
+});
+
+}
+function renderTrashPage(){
+
+const grid =
+document.getElementById(
+"trashGrid"
+);
+
+if(!grid) return;
+
+grid.innerHTML = "";
+
+state.entries
+.filter(
+e=>e.trashed
+)
+.forEach(entry=>{
+
+grid.appendChild(
+createMemoryCard(entry)
+);
+
+});
+
+}

@@ -111,30 +111,30 @@
         <!-- Navigation -->
 
         <nav class="sidebar-nav">
-          <button class="nav-item active">
-            <i class="fa-solid fa-book-open"></i>
-            <span>Diary</span>
-          </button>
+        <button class="nav-item active" data-view="diary">
+    <i class="fa-solid fa-book-open"></i>
+    <span>Diary</span>
+</button>
 
-          <button class="nav-item">
-            <i class="fa-solid fa-calendar"></i>
-            <span>Calendar</span>
-          </button>
+<button class="nav-item" data-view="calendar">
+    <i class="fa-solid fa-calendar"></i>
+    <span>Calendar</span>
+</button>
 
-          <button class="nav-item">
-            <i class="fa-solid fa-star"></i>
-            <span>Favorites</span>
-          </button>
+<button class="nav-item" data-view="favorites">
+    <i class="fa-solid fa-star"></i>
+    <span>Favorites</span>
+</button>
 
-          <button class="nav-item">
-            <i class="fa-solid fa-trash"></i>
-            <span>Trash</span>
-          </button>
+<button class="nav-item" data-view="trash">
+    <i class="fa-solid fa-trash"></i>
+    <span>Trash</span>
+</button>
 
-          <button class="nav-item">
-            <i class="fa-solid fa-gear"></i>
-            <span>Settings</span>
-          </button>
+<button class="nav-item" data-view="settings">
+    <i class="fa-solid fa-gear"></i>
+    <span>Settings</span>
+</button>
         </nav>
 
         <div class="sidebar-divider"></div>
@@ -409,10 +409,47 @@
           <!-- Scrapbook -->
 
           <section class="glass scrapbook-board">
-            <h2>Scrapbook Board</h2>
 
-            <div id="scrapbookGrid"></div>
-          </section>
+    <div class="section-header">
+
+        <h2>📒 Scrapbook Board</h2>
+
+        <div class="scrapbook-actions">
+
+            <button
+                id="addStickyNote"
+                class="secondary-btn">
+
+                📝 Note
+
+            </button>
+
+            <button
+                id="addMemoryCard"
+                class="secondary-btn">
+
+                📷 Memory
+
+            </button>
+
+            <button
+                id="addSticker"
+                class="secondary-btn">
+
+                🌸 Sticker
+
+            </button>
+
+        </div>
+
+    </div>
+
+    <div
+        id="scrapbookGrid"
+        class="scrapbook-canvas">
+    </div>
+
+</section>
 
           <!-- Analytics -->
 
@@ -449,7 +486,9 @@
     </div>
 
 </section>
-<section id="habitTracker" class="glass dashboard-section">
+<section
+    id="habitTracker"
+    class="glass dashboard-section">
 
     <div class="section-header">
         <h2>🔥 Habit Tracker</h2>
@@ -458,20 +497,41 @@
     <div id="habitGrid"></div>
 
 </section>
-<section id="heatmapSection" class="glass dashboard-section">
+<section class="glass heatmap-section">
 
     <div class="section-header">
-        <h2>📈 Monthly Activity Heatmap</h2>
+        <h2>🔥 Writing Activity</h2>
     </div>
 
-    <div id="heatmapGrid"></div>
+    <div class="heatmap-stats">
+
+        <div class="heatmap-stat">
+            <h4>Current Streak</h4>
+            <span id="currentHeatmapStreak">
+                0 Days
+            </span>
+        </div>
+
+        <div class="heatmap-stat">
+            <h4>Longest Streak</h4>
+            <span id="longestHeatmapStreak">
+                0 Days
+            </span>
+        </div>
+
+    </div>
+
+    <div id="heatmapGrid"
+         class="heatmap-grid">
+    </div>
 
 </section>
 <!-- ===================================================== -->
 <!-- CALENDAR VIEW -->
 <!-- ===================================================== -->
 
-<section id="calendarView" class="glass dashboard-section">
+<section id="calendarWorkspace" class="glass dashboard-section" hidden
+class="workspace">
 
     <div class="section-header">
         <h2>📅 Memory Calendar</h2>
@@ -486,22 +546,63 @@
     <div id="calendarGrid"></div>
 
 </section>
-<section id="polaroidGallery" class="glass dashboard-section">
+<section
+id="favoritesWorkspace"
+hidden
+class="workspace">
 
-    <div class="section-header">
-        <h2>📷 Photo Memories</h2>
-    </div>
+<h1>⭐ Favorite Memories</h1>
 
-    <div id="galleryGrid"></div>
+<div id="favoritesGrid"></div>
 
 </section>
-<section id="visionBoard" class="glass dashboard-section">
+<section class="glass photo-gallery-section">
 
     <div class="section-header">
-        <h2>🎯 Vision Board</h2>
+        <h2>📸 Polaroid Gallery</h2>
+
+        <label
+            class="primary-btn">
+
+            Upload Photo
+
+            <input
+                type="file"
+                id="galleryUpload"
+                accept="image/*"
+                hidden
+            >
+        </label>
+
     </div>
 
-    <div id="visionBoardGrid"></div>
+    <div
+        id="galleryGrid"
+        class="gallery-grid">
+    </div>
+
+</section>
+<section class="glass vision-board-section">
+
+    <div class="section-header">
+
+        <h2>🎯 Vision Board</h2>
+
+        <button
+            id="addVisionGoal"
+            class="primary-btn">
+
+            Add Goal
+
+        </button>
+
+    </div>
+
+    <div
+        id="visionBoardGrid"
+        class="vision-board-grid">
+
+    </div>
 
 </section>
         <!-- =============================================== -->
@@ -531,18 +632,29 @@
         <!-- TRAVEL JOURNAL -->
         <!-- =============================================== -->
 
-        <section id="travelWorkspace" class="workspace">
-          <div class="workspace-hero travel-theme">
-               <div id="travelStories"></div>
+       <section id="travelWorkspace" class="workspace">
 
-    <div id="travelGallery"></div>
+<div class="workspace-hero travel-theme">
 
-    <div id="visitedPlaces"></div>
+<div id="travelStories"></div>
 
-    <div id="bucketList"></div>
+<div id="travelGallery"></div>
 
-    <div id="travelTimeline"></div>
-        </section>
+<div id="visitedPlaces"></div>
+
+<div id="bucketList"></div>
+
+<div id="travelTimeline"></div>
+
+</div>
+
+<div class="workspace-placeholder">
+
+Travel Stories Gallery Places Bucket List Timeline
+
+</div>
+
+</section>
 
         <!-- =============================================== -->
         <!-- STUDY JOURNAL -->
@@ -588,7 +700,7 @@
           </div>
         </section>
         <section
-    id="settingsPanel"
+    id="settingsWorkspace"
     class="workspace">
 
     <div class="glass settings-card">
@@ -621,7 +733,19 @@
                 id="changePasswordBtn">
                 Change Password
             </button>
+            <h3>Exports</h3>
 
+    <button id="exportDiaryPDF">
+        Export Full Diary
+    </button>
+
+    <button id="exportJournalPDF">
+        Export Journal
+    </button>
+
+    <button id="exportFavoritesPDF">
+        Export Favorites
+    </button>
         </div>
 
         <div class="settings-group">
@@ -631,10 +755,22 @@
             <button id="themeToggleBtn">
                 Toggle Theme
             </button>
-
+            <button id="logoutBtn">
+        Logout
+    </button>
         </div>
 
     </div>
+
+</section>
+<section
+id="trashWorkspace"
+hidden
+class="workspace">
+
+<h1>🗑 Trash</h1>
+
+<div id="trashGrid"></div>
 
 </section>
       </main>
@@ -677,8 +813,6 @@
     <script src="modules/calendar.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="modules/indexeddb.js"></script>
-
-<script src="modules/calendar.js"></script>
 
 <script src="modules/pdf-export.js"></script>
 
