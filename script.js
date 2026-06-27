@@ -1,6 +1,6 @@
-/* ==========================================================
+﻿/* ==========================================================
    MYDIARY V3
-   SCRIPT.JS — PART 1
+   SCRIPT.JS â€” PART 1
    CORE APP FOUNDATION
 ========================================================== */
 
@@ -126,9 +126,17 @@ function removeLocal(key){
    JOURNAL STORAGE
 ========================================================== */
 
+function getJournalStorageKeyFor(journal){
+
+    return `mydiary_${journal}`;
+
+}
+
 function getJournalStorageKey(){
 
-    return `mydiary_${state.activeJournal}`;
+    return getJournalStorageKeyFor(
+        state.activeJournal
+    );
 
 }
 
@@ -228,6 +236,11 @@ function login(password){
         return;
     }
 
+    sessionStorage.setItem(
+        STORAGE_KEYS.SESSION,
+        "loggedin"
+    );
+
     if(rememberMe.checked){
 
         localStorage.setItem(
@@ -244,7 +257,7 @@ function login(password){
     false;
 
     showToast(
-        "Welcome Back 🌸",
+        "Welcome Back ðŸŒ¸",
         "success"
     );
 
@@ -274,6 +287,9 @@ function checkSession(){
     const session =
     localStorage.getItem(
         STORAGE_KEYS.SESSION
+    ) ||
+    sessionStorage.getItem(
+        STORAGE_KEYS.SESSION
     );
 
     if(session === "loggedin"){
@@ -297,6 +313,10 @@ function checkSession(){
 function logout(){
 
     localStorage.removeItem(
+        STORAGE_KEYS.SESSION
+    );
+
+    sessionStorage.removeItem(
         STORAGE_KEYS.SESSION
     );
 
@@ -381,6 +401,18 @@ journalButtons.forEach(btn=>{
         "click",
         ()=>{
 
+            if(
+                appShell &&
+                appShell.hidden === false
+            ){
+
+                sessionStorage.setItem(
+                    STORAGE_KEYS.SESSION,
+                    "loggedin"
+                );
+
+            }
+
             switchJournal(
                 btn.dataset.journal
             );
@@ -389,6 +421,100 @@ journalButtons.forEach(btn=>{
     );
 
 });
+
+function getPageContext(){
+
+    const body = document.body;
+
+    return {
+        page: body?.dataset.page || "diary",
+        journal: body?.dataset.journal || null
+    };
+
+}
+
+function setActiveLinks(page, journal){
+
+    document
+    .querySelectorAll(".nav-item")
+    .forEach(link=>{
+
+        link.classList.toggle(
+            "active",
+            link.dataset.view === page
+        );
+
+    });
+
+    document
+    .querySelectorAll(".journal-pill")
+    .forEach(link=>{
+
+        link.classList.toggle(
+            "active",
+            link.dataset.journal === journal
+        );
+
+    });
+
+}
+
+function initializeCurrentPage(){
+
+    const context =
+        getPageContext();
+
+    const journal =
+        context.journal ||
+        state.activeJournal;
+
+    if(context.journal){
+
+        state.activeJournal =
+        context.journal;
+
+        localStorage.setItem(
+            STORAGE_KEYS.ACTIVE_JOURNAL,
+            context.journal
+        );
+
+    }
+
+    switchJournal(journal);
+
+    if(context.page !== "diary"){
+
+        showView(context.page);
+
+    }
+
+    setActiveLinks(
+        context.page,
+        journal
+    );
+
+    if(context.page === "favorites"){
+
+        renderFavoritesPage();
+
+    }
+
+    if(context.page === "trash"){
+
+        renderTrashPage();
+
+    }
+
+    if(
+        context.page === "calendar" &&
+        window.MyDiaryCalendar
+    ){
+
+        window.MyDiaryCalendar.refreshCalendar();
+
+    }
+
+}
 
 /* ==========================================================
    LOAD JOURNAL ENTRIES
@@ -421,6 +547,23 @@ function saveJournalEntries(){
     saveLocal(
         getJournalStorageKey(),
         state.entries
+    );
+
+}
+
+function loadEntriesForJournal(journal){
+
+    return loadLocal(
+        getJournalStorageKeyFor(journal)
+    ) || [];
+
+}
+
+function saveEntriesForJournal(journal, entries){
+
+    saveLocal(
+        getJournalStorageKeyFor(journal),
+        entries
     );
 
 }
@@ -501,9 +644,7 @@ function initializeApp(){
 
     loadRandomQuote();
     loadDraft();
-    switchJournal(
-        state.activeJournal
-    );
+    initializeCurrentPage();
 
 }
 
@@ -536,7 +677,7 @@ document.addEventListener(
 );
 /* ==========================================================
    MYDIARY V3
-   SCRIPT.JS — PART 2
+   SCRIPT.JS â€” PART 2
    EDITOR + AUTOSAVE + VOICE
 ========================================================== */
 
@@ -552,6 +693,9 @@ document.getElementById("entryTitle");
 
 const entryQuote =
 document.getElementById("entryQuote");
+
+const entryJournalSelect =
+document.getElementById("entryJournalSelect");
 
 const moodSelect =
 document.getElementById("moodSelect");
@@ -681,6 +825,9 @@ function getDraftObject(){
         quote:
             entryQuote?.value || "",
 
+        journal:
+            entryJournalSelect?.value || "personal",
+
         mood:
             moodSelect?.value || "",
 
@@ -758,6 +905,13 @@ function loadDraft(){
 
     }
 
+    if(entryJournalSelect){
+
+        entryJournalSelect.value =
+        draft.journal || state.activeJournal;
+
+    }
+
     if(moodSelect){
 
         moodSelect.value =
@@ -768,7 +922,7 @@ function loadDraft(){
     if(weatherSelect){
 
         weatherSelect.value =
-        draft.weather || "☀️ Sunny";
+        draft.weather || "â˜€ï¸ Sunny";
 
     }
 
@@ -807,7 +961,8 @@ function clearDraft(){
 [
 editor,
 entryTitle,
-entryQuote
+entryQuote,
+entryJournalSelect
 ].forEach(el=>{
 
     if(!el) return;
@@ -904,7 +1059,7 @@ function renderImagePreview(){
             );
 
             removeBtn.innerHTML =
-            "✕";
+            "âœ•";
 
             removeBtn.style.position =
             "absolute";
@@ -1048,7 +1203,7 @@ function applyFormatting(command){
             document.execCommand(
                 "insertHTML",
                 false,
-                `<div>☐ Checklist Item</div>`
+                `<div>â˜ Checklist Item</div>`
             );
 
             break;
@@ -1083,7 +1238,7 @@ if(SpeechRecognition){
     ()=>{
 
         setSaveStatus(
-            "🎤 Listening..."
+            "ðŸŽ¤ Listening..."
         );
 
     };
@@ -1123,7 +1278,7 @@ recognition.onresult = (event) => {
     );
 
     setSaveStatus(
-        "✓ Voice Added"
+        "âœ“ Voice Added"
     );
 
     updateWritingStats();
@@ -1238,6 +1393,8 @@ document
 
         entryQuote.value = "";
 
+        resetEntryJournalSelect();
+
         editor.innerHTML = "";
 
         attachedImages = [];
@@ -1272,7 +1429,7 @@ document.addEventListener(
 );
 /* ==========================================================
    MYDIARY V3
-   SCRIPT.JS — PART 3
+   SCRIPT.JS â€” PART 3
    SAVE ENTRY + MEMORY FEED + MODAL
 ========================================================== */
 
@@ -1338,7 +1495,7 @@ function createEntryObject(){
             Date.now(),
 
         journal:
-            state.activeJournal,
+            entryJournalSelect?.value || state.activeJournal,
 
         title:
             entryTitle.value.trim(),
@@ -1421,18 +1578,41 @@ function validateEntry(){
 ========================================================== */
 
 function saveEntry(){
-    loadJournalEntries();
+
     if(!validateEntry())
         return;
 
     const entry =
     createEntryObject();
 
-    state.entries.unshift(
+    const targetJournal =
+    entry.journal || state.activeJournal;
+
+    const targetEntries =
+    loadEntriesForJournal(
+        targetJournal
+    );
+
+    targetEntries.unshift(
         entry
     );
 
-    saveJournalEntries();
+    saveEntriesForJournal(
+        targetJournal,
+        targetEntries
+    );
+
+    if(targetJournal === state.activeJournal){
+
+        state.entries =
+        targetEntries;
+
+    }
+    else{
+
+        loadJournalEntries();
+
+    }
 
     renderMemoryFeed();
 
@@ -1443,12 +1623,22 @@ function saveEntry(){
     updateAnalytics();
 
     showToast(
-        "✓ Entry Saved",
+        `Entry saved to ${capitalize(targetJournal)}`,
         "success"
     );
 
 }
 
+function resetEntryJournalSelect(){
+
+    if(entryJournalSelect){
+
+        entryJournalSelect.value =
+        state.activeJournal;
+
+    }
+
+}
 /* ==========================================================
    SAVE BUTTON
 ========================================================== */
@@ -1467,6 +1657,8 @@ function clearEditorAfterSave(){
     entryTitle.value = "";
 
     entryQuote.value = "";
+
+    resetEntryJournalSelect();
 
     editor.innerHTML = "";
 
@@ -1618,21 +1810,21 @@ function createMemoryCard(entry){
                     class="action-btn favorite-btn"
                     data-id="${entry.id}"
                 >
-                    ${entry.favorite ? "⭐" : "☆"}
+                    ${entry.favorite ? "â­" : "â˜†"}
                 </button>
 
                 <button
                     class="action-btn pin-btn"
                     data-id="${entry.id}"
                 >
-                    ${entry.pinned ? "📌" : "📍"}
+                    ${entry.pinned ? "ðŸ“Œ" : "ðŸ“"}
                 </button>
 
                 <button
                     class="action-btn delete-btn"
                     data-id="${entry.id}"
                 >
-                    🗑
+                    ðŸ—‘
                 </button>
 
             </div>
@@ -2046,7 +2238,7 @@ document.addEventListener(
 );
 /* ==========================================================
    MYDIARY V3
-   SCRIPT.JS — PART 4
+   SCRIPT.JS â€” PART 4
    TOASTS + ANALYTICS + BACKUPS + SETTINGS
 ========================================================== */
 
@@ -2288,7 +2480,7 @@ function updateAnalytics(){
     if(streakCount){
 
         streakCount.textContent =
-        `${streak}🔥`;
+        `${streak}ðŸ”¥`;
 
     }
 
@@ -2410,7 +2602,7 @@ function exportJSON(){
         .toISOString(),
 
         journal:
-        state.activeJournal,
+            entryJournalSelect?.value || state.activeJournal,
 
         entries:
         state.entries
@@ -2678,7 +2870,7 @@ window.MyDiary = {
 };
 
 console.log(
-    "📖 MyDiary V3 Loaded"
+    "ðŸ“– MyDiary V3 Loaded"
 );
 document
 .getElementById(
@@ -2725,6 +2917,18 @@ document.querySelectorAll(".nav-item")
 .forEach(btn => {
 
     btn.addEventListener("click", () => {
+
+        if(
+            appShell &&
+            appShell.hidden === false
+        ){
+
+            sessionStorage.setItem(
+                STORAGE_KEYS.SESSION,
+                "loggedin"
+            );
+
+        }
 
         const view =
             btn.dataset.view;
@@ -2809,6 +3013,32 @@ target.classList.add(
 "active-workspace"
 );
 
+setActiveLinks(
+view,
+state.activeJournal
+);
+
+if(view === "favorites"){
+
+renderFavoritesPage();
+
+}
+
+if(view === "trash"){
+
+renderTrashPage();
+
+}
+
+if(
+view === "calendar" &&
+window.MyDiaryCalendar
+){
+
+window.MyDiaryCalendar.refreshCalendar();
+
+}
+
 }
 
 }
@@ -2838,13 +3068,51 @@ document
 "click",
 ()=>{
 
-if(
-window.MyDiaryPassword
-){
+const currentPassword =
+document.getElementById("currentPassword")?.value || "";
 
-MyDiaryPassword.changePassword();
+const newPassword =
+document.getElementById("newPassword")?.value || "";
+
+const confirmPassword =
+document.getElementById("confirmPassword")?.value || "";
+
+const savedPassword =
+localStorage.getItem(
+STORAGE_KEYS.PASSWORD
+);
+
+if(currentPassword !== savedPassword){
+
+showToast(
+"Current password is incorrect",
+"error"
+);
+
+return;
 
 }
+
+if(!newPassword || newPassword !== confirmPassword){
+
+showToast(
+"New passwords do not match",
+"error"
+);
+
+return;
+
+}
+
+localStorage.setItem(
+STORAGE_KEYS.PASSWORD,
+newPassword
+);
+
+showToast(
+"Password changed",
+"success"
+);
 
 }
 );
@@ -2896,3 +3164,12 @@ createMemoryCard(entry)
 });
 
 }
+
+
+
+
+
+
+
+
+

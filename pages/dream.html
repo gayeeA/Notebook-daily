@@ -1,0 +1,88 @@
+﻿<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dreams - MyDiary</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Caveat:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" />
+    <link rel="stylesheet" href="../styles.css" />
+  </head>
+  <body data-page="diary" data-journal="dream">
+    <div class="bg-blob blob-1"></div>
+    <div class="bg-blob blob-2"></div>
+    <div class="bg-blob blob-3"></div>
+
+    <section id="authScreen">
+      <div class="auth-container">
+        <div class="auth-card glass">
+          <div class="auth-logo">📖</div>
+          <h1>MyDiary</h1>
+          <p class="auth-subtitle">Your Personal Memory Journal</p>
+          <form id="loginForm">
+            <div class="input-group">
+              <label>Password</label>
+              <input type="password" id="loginPassword" placeholder="Enter your diary password" />
+            </div>
+            <div class="remember-row">
+              <label class="remember-label"><input type="checkbox" id="rememberMe" /> Remember Me</label>
+            </div>
+            <button type="submit" class="primary-btn auth-btn">Unlock Journal</button>
+          </form>
+          <div class="first-time-setup">
+            <p>First time here?</p>
+            <button id="createPasswordBtn" class="secondary-btn">Create Password</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div id="appShell" hidden>
+      <aside class="sidebar glass">
+        <div class="sidebar-top">
+          <div class="brand">
+            <div class="brand-icon">📖</div>
+            <div><h2>MyDiary</h2><span>Memory Journal</span></div>
+          </div>
+        </div>
+        <nav class="sidebar-nav">
+          <a class="nav-item" data-view="diary" href="../index.html"><i class="fa-solid fa-book-open"></i><span>Diary</span></a>
+          <a class="nav-item" data-view="calendar" href="calendar.html"><i class="fa-solid fa-calendar"></i><span>Calendar</span></a>
+          <a class="nav-item" data-view="favorites" href="favorites.html"><i class="fa-solid fa-star"></i><span>Favorites</span></a>
+          <a class="nav-item" data-view="trash" href="trash.html"><i class="fa-solid fa-trash"></i><span>Trash</span></a>
+          <a class="nav-item" data-view="settings" href="settings.html"><i class="fa-solid fa-gear"></i><span>Settings</span></a>
+        </nav>
+        <div class="sidebar-divider"></div>
+        <div class="journal-section">
+          <h4>📚 Journals</h4>
+          <div class="journal-pills">
+            <a class="journal-pill" data-journal="personal" href="../index.html">🌸 Personal</a>
+            <a class="journal-pill" data-journal="work" href="work.html">💼 Work</a>
+            <a class="journal-pill" data-journal="travel" href="travel.html">✈️ Travel</a>
+            <a class="journal-pill" data-journal="study" href="study.html">📚 Study</a>
+            <a class="journal-pill" data-journal="dream" href="dream.html">🌙 Dreams</a>
+          </div>
+        </div>
+        <div class="sidebar-divider"></div>
+        <div class="quick-stats">
+          <div class="stat-card"><span class="stat-label">Entries</span><span id="entryCount">0</span></div>
+          <div class="stat-card"><span class="stat-label">Streak</span><span id="streakCount">0🔥</span></div>
+        </div>
+      </aside>
+      <main class="main-content">
+        <section id="dreamWorkspace" class="workspace">
+          <div class="workspace-hero dream-theme">
+            <h1>🌙 Dream Journal</h1>
+          </div>
+          <div class="workspace-placeholder glass">
+            Dream Entries Symbols Interpretations Analytics
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <div id="memoryModal" class="modal"><div class="modal-content glass"><button id="closeModal">✕</button><div id="modalBody"></div></div></div>
+    <div id="toastContainer"></div>
+    <script src="../script.js"></script>
+  </body>
+</html>

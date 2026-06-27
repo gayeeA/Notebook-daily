@@ -1,4 +1,4 @@
-/* ==========================================================
+﻿/* ==========================================================
    MYDIARY V3
    CALENDAR MODULE
    modules/calendar.js
@@ -60,16 +60,43 @@ const WEEKDAYS = [
    GET ENTRIES
 ========================================================== */
 
-function getEntries() {
+function readJournalEntries(journal) {
 
-    if (
-        window.state &&
-        Array.isArray(window.state.entries)
-    ) {
-        return window.state.entries;
+    try {
+
+        const raw =
+            localStorage.getItem(
+                `mydiary_${journal}`
+            );
+
+        return raw ? JSON.parse(raw) : [];
+
+    }
+    catch {
+
+        return [];
+
     }
 
-    return [];
+}
+
+function getEntries() {
+
+    const journals = [
+        "personal",
+        "work",
+        "travel",
+        "study",
+        "dream"
+    ];
+
+    return journals.flatMap(journal =>
+        readJournalEntries(journal)
+        .map(entry => ({
+            ...entry,
+            journal: entry.journal || journal
+        }))
+    );
 
 }
 
@@ -323,7 +350,7 @@ function openDayEntries(
 
     let html = `
         <h2>
-            📅 ${dateString}
+            ðŸ“… ${dateString}
         </h2>
     `;
 
@@ -341,7 +368,7 @@ function openDayEntries(
                     </h3>
 
                     <p>
-                        ${entry.mood || ""}
+                        ${entry.mood || ""} · ${entry.journal || "personal"}
                     </p>
 
                     <div>
