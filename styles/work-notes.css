@@ -1,0 +1,125 @@
+/* Container Padding & Base Layout Setup */
+.dashboard-notes-section[data-journal-notes="work"] {
+  padding: 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* Professional Note Composer Card */
+.dashboard-notes-section .journal-note-composer {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  background: rgba(255, 255, 255, 0.5);
+  padding: 22px;
+  border-radius: 16px; /* Slightly sharper corporate radius */
+  border: 1px solid rgba(255, 255, 255, 0.7);
+}
+
+/* Input Fields (Title, Main Textarea, and Search Filters) */
+.dashboard-notes-section .journal-note-composer input.journal-note-title,
+.dashboard-notes-section .journal-note-composer textarea.journal-note-content,
+.dashboard-notes-section .journal-notes-history input.journal-note-search {
+  background: rgba(255, 255, 255, 0.96);
+  border: 1px solid rgba(0, 0, 0, 0.09);
+  border-radius: 10px;
+  padding: 12px 16px;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  color: #1e293b; /* Deep slate font color */
+  outline: none;
+  transition: all 0.15s ease-in-out;
+}
+
+/* Professional Focus State (Corporate Slate-Blue/Indigo Accent) */
+.dashboard-notes-section .journal-note-composer input.journal-note-title:focus,
+.dashboard-notes-section .journal-note-composer textarea.journal-note-content:focus,
+.dashboard-notes-section .journal-notes-history input.journal-note-search:focus {
+  border-color: #6366f1; /* Sharp Indigo */
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+}
+
+/* Font Adjustments for Work Titles */
+.dashboard-notes-section .journal-note-composer input.journal-note-title {
+  font-weight: 600;
+  font-size: 15px;
+  letter-spacing: -0.01em;
+}
+
+/* Textarea Optimization for Action Items & Lists */
+.dashboard-notes-section .journal-note-composer textarea.journal-note-content {
+  resize: vertical;
+  min-height: 120px;
+  line-height: 1.6;
+}
+
+/* Action Control Row */
+.dashboard-notes-section .journal-note-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 4px;
+}
+
+/* Historical Feed / Log Panel Setup */
+.dashboard-notes-section .journal-notes-history {
+  margin-top: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.dashboard-notes-section .journal-notes-history input.journal-note-search {
+  width: 100%;
+  max-width: 360px;
+  height: 42px;
+}
+
+/* Grid Layout for Rendered Work Logs */
+.dashboard-notes-section .journal-notes-feed {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
+  gap: 16px;
+  margin-top: 6px;
+}
+
+/* Rendered Work Cards (.dashboard-card) */
+.dashboard-notes-section .dashboard-card {
+  background: rgba(255, 255, 255, 0.82);
+  border: 1px solid rgba(255, 255, 255, 0.95);
+  border-radius: 14px;
+  padding: 20px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.01);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* Card Hover Elevation Effect */
+.dashboard-notes-section .dashboard-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.04);
+}
+
+/* Minimalist Empty State Container */
+.journal-notes-empty {
+  text-align: center;
+  padding: 45px 20px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  border: 1px dashed rgba(30, 41, 59, 0.15);
+  margin-top: 6px;
+}
+
+.journal-notes-empty h3 {
+  color: #334155;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.journal-notes-empty p {
+  color: #64748b;
+  font-size: 13.5px;
+}

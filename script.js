@@ -3164,7 +3164,269 @@ createMemoryCard(entry)
 });
 
 }
+/* =====================================================
+   EDITOR EXTRAS — Sticker / Tape / Doodle / Polaroid
+   Hooks into existing buttons: #stickerBtn, #tapeBtn,
+   #doodleBtn, #polaroidBtn and inserts into #editor.
+===================================================== */
 
+(function () {
+  "use strict";
+
+  const editor = document.getElementById("editor");
+  if (!editor) return;
+
+  let activePopover = null;
+  let savedRange = null;
+
+  /* ---------- helpers ---------- */
+
+  function closePopover() {
+    if (activePopover) {
+      activePopover.remove();
+      activePopover = null;
+    }
+    document.removeEventListener("click", outsideClickHandler, true);
+  }
+
+  function outsideClickHandler(e) {
+    if (activePopover && !activePopover.contains(e.target)) {
+      closePopover();
+    }
+  }
+
+  function saveSelection() {
+    const sel = window.getSelection();
+    if (sel && sel.rangeCount > 0 && editor.contains(sel.anchorNode)) {
+      savedRange = sel.getRangeAt(0).cloneRange();
+    } else {
+      // fall back to end of editor
+      const range = document.createRange();
+      range.selectNodeContents(editor);
+      range.collapse(false);
+      savedRange = range;
+    }
+  }
+
+  function insertHTMLAtSavedRange(html) {
+    editor.focus();
+    const sel = window.getSelection();
+    sel.removeAllRanges();
+    if (savedRange) {
+      sel.addRange(savedRange);
+    }
+    document.execCommand("insertHTML", false, html);
+    editor.dispatchEvent(new Event("input", { bubbles: true }));
+  }
+
+  function openPopover(anchorBtn, title, bodyEl) {
+    closePopover();
+    saveSelection();
+
+    const pop = document.createElement("div");
+    pop.className = "ee-popover glass";
+
+    const header = document.createElement("div");
+    header.className = "ee-popover-header";
+    header.innerHTML = `<h4>${title}</h4>`;
+
+    const closeBtn = document.createElement("button");
+    closeBtn.className = "ee-popover-close";
+    closeBtn.textContent = "✕";
+    closeBtn.addEventListener("click", closePopover);
+    header.appendChild(closeBtn);
+
+    pop.appendChild(header);
+    pop.appendChild(bodyEl);
+
+    document.body.appendChild(pop);
+
+    const rect = anchorBtn.getBoundingClientRect();
+    const top = window.scrollY + rect.bottom + 8;
+    let left = window.scrollX + rect.left;
+    const maxLeft = window.scrollX + window.innerWidth - pop.offsetWidth - 16;
+    if (left > maxLeft) left = maxLeft;
+    if (left < 8) left = 8;
+
+    pop.style.top = top + "px";
+    pop.style.left = left + "px";
+
+    activePopover = pop;
+
+    setTimeout(() => {
+      document.addEventListener("click", outsideClickHandler, true);
+    }, 0);
+  }
+
+  /* ---------- STICKERS ---------- */
+
+  const STICKERS = [
+    "🌸", "🦋", "🍒", "🍓", "🍄", "🌻", "🌈", "☁️",
+    "✨", "💖", "🎀", "🧸", "🍰", "🍡", "🌙", "⭐",
+    "🪐", "🐚", "🌺", "🍉", "🦢", "🕊️", "🍋", "🧁",
+    "🔮", "🎧", "📌", "🧷", "🪞", "🫧", "🍂", "🌷",
+    "🐝", "🍑", "🪄", "💌", "🧺", "🪻", "🍃", "🌼",
+  ];
+
+  function buildStickerBody() {
+    const grid = document.createElement("div");
+    grid.className = "ee-sticker-grid";
+    STICKERS.forEach((emoji) => {
+      const btn = document.createElement("button");
+      btn.className = "ee-sticker-option";
+      btn.textContent = emoji;
+      btn.addEventListener("click", () => {
+        insertHTMLAtSavedRange(`<span class="sticker-inline">${emoji}</span>`);
+        closePopover();
+      });
+      grid.appendChild(btn);
+    });
+    return grid;
+  }
+
+  /* ---------- TAPE ---------- */
+
+  const TAPES = [
+    { cls: "ee-tape-floral", label: "Floral" },
+    { cls: "ee-tape-kraft", label: "Kraft" },
+    { cls: "ee-tape-polka", label: "Polka" },
+    { cls: "ee-tape-gingham", label: "Gingham" },
+    { cls: "ee-tape-stripe", label: "Stripe" },
+    { cls: "ee-tape-stars", label: "Stars" },
+    { cls: "ee-tape-plaid", label: "Plaid" },
+    { cls: "ee-tape-rainbow", label: "Rainbow" },
+    { cls: "ee-tape-lace", label: "Lace" },
+  ];
+
+  function buildTapeBody() {
+    const grid = document.createElement("div");
+    grid.className = "ee-tape-grid";
+    grid.style.paddingBottom = "16px";
+    TAPES.forEach((tape) => {
+      const btn = document.createElement("button");
+      btn.className = "ee-tape-option " + tape.cls;
+      btn.setAttribute("data-label", tape.label);
+      btn.addEventListener("click", () => {
+        const rotation = (Math.random() * 8 - 4).toFixed(1);
+        insertHTMLAtSavedRange(
+          `<span class="tape-inline ${tape.cls}" style="transform:rotate(${rotation}deg)"></span>`
+        );
+        closePopover();
+      });
+      grid.appendChild(btn);
+    });
+    return grid;
+  }
+
+  /* ---------- DOODLES ---------- */
+
+  const DOODLES = {
+    heart:
+      '<svg viewBox="0 0 24 24" fill="none" stroke="#ff82b2" stroke-width="2"><path d="M12 21s-7-4.6-9.5-9.1C0.7 8.4 2.4 5 5.8 5c2 0 3.4 1.1 4.2 2.4C10.8 6.1 12.2 5 14.2 5c3.4 0 5.1 3.4 3.3 6.9C19 16.4 12 21 12 21z" stroke-linejoin="round"/></svg>',
+    star:
+      '<svg viewBox="0 0 24 24" fill="none" stroke="#ffb24a" stroke-width="2"><path d="M12 2l2.6 6.6 7 0.4-5.4 4.4 1.9 6.8L12 16.8 6 20.2l1.9-6.8L2.4 9l7-0.4L12 2z" stroke-linejoin="round"/></svg>',
+    swirl:
+      '<svg viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="2"><path d="M4 12a8 8 0 1 1 8 8 5 5 0 1 1 5-5 3 3 0 1 1-3-3" stroke-linecap="round"/></svg>',
+    arrow:
+      '<svg viewBox="0 0 24 24" fill="none" stroke="#1b8c68" stroke-width="2"><path d="M3 12c5-6 9-2 9 1s4 7 9 1" stroke-linecap="round"/><path d="M17 10l4 4-4 4" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    flower:
+      '<svg viewBox="0 0 24 24" fill="none" stroke="#d44882" stroke-width="2"><circle cx="12" cy="12" r="2.2"/><circle cx="12" cy="6" r="2.2"/><circle cx="12" cy="18" r="2.2"/><circle cx="6" cy="12" r="2.2"/><circle cx="18" cy="12" r="2.2"/></svg>',
+    cloud:
+      '<svg viewBox="0 0 24 24" fill="none" stroke="#7fa0ff" stroke-width="2"><path d="M6 17a4 4 0 0 1-1-7.9A5 5 0 0 1 14.8 7 4.5 4.5 0 0 1 18 17H6z" stroke-linejoin="round"/></svg>',
+    sparkle:
+      '<svg viewBox="0 0 24 24" fill="none" stroke="#c17a00" stroke-width="2"><path d="M12 3v5M12 16v5M3 12h5M16 12h5" stroke-linecap="round"/><path d="M6 6l3 3M15 15l3 3M18 6l-3 3M9 15l-3 3" stroke-linecap="round"/></svg>',
+    wave:
+      '<svg viewBox="0 0 24 24" fill="none" stroke="#0fa4af" stroke-width="2"><path d="M2 14c2-3 4-3 6 0s4 3 6 0 4-3 6 0" stroke-linecap="round"/></svg>',
+    leaf:
+      '<svg viewBox="0 0 24 24" fill="none" stroke="#1b8c68" stroke-width="2"><path d="M5 19C4 11 9 4 19 4c1 8-5 13-13 14-1 0-1-0-1-0z" stroke-linejoin="round"/><path d="M6 18C9 14 12 11 16 8" stroke-linecap="round"/></svg>',
+    moon:
+      '<svg viewBox="0 0 24 24" fill="none" stroke="#5034a5" stroke-width="2"><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5z" stroke-linejoin="round"/></svg>',
+    bow:
+      '<svg viewBox="0 0 24 24" fill="none" stroke="#ff82b2" stroke-width="2"><path d="M12 12L4 6v12l8-6zM12 12l8-6v12l-8-6z" stroke-linejoin="round"/><circle cx="12" cy="12" r="1.6" fill="#ff82b2"/></svg>',
+    underline:
+      '<svg viewBox="0 0 24 24" fill="none" stroke="#ea5455" stroke-width="2"><path d="M3 17c4-3 14-3 18 0" stroke-linecap="round"/></svg>',
+  };
+
+  function buildDoodleBody() {
+    const grid = document.createElement("div");
+    grid.className = "ee-doodle-grid";
+    Object.entries(DOODLES).forEach(([name, svg]) => {
+      const btn = document.createElement("button");
+      btn.className = "ee-doodle-option";
+      btn.title = name;
+      btn.innerHTML = svg;
+      btn.addEventListener("click", () => {
+        insertHTMLAtSavedRange(
+          `<span class="doodle-inline">${svg}</span>`
+        );
+        closePopover();
+      });
+      grid.appendChild(btn);
+    });
+    return grid;
+  }
+
+  /* ---------- POLAROID ---------- */
+
+  function buildPolaroidBody() {
+    const wrap = document.createElement("div");
+    wrap.className = "ee-polaroid-trigger";
+    wrap.innerHTML = `
+      <div class="ee-polaroid-icon">🔳</div>
+      <p>Choose a photo from your device to add it as a polaroid in your entry.</p>
+    `;
+
+    const chooseBtn = document.createElement("button");
+    chooseBtn.className = "primary-btn";
+    chooseBtn.textContent = "Choose Photo";
+
+    const fileInput = document.createElement("input");
+    fileInput.type = "file";
+    fileInput.accept = "image/*";
+    fileInput.hidden = true;
+
+    chooseBtn.addEventListener("click", () => fileInput.click());
+
+    fileInput.addEventListener("change", () => {
+      const file = fileInput.files && fileInput.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        const rotation = (Math.random() * 6 - 3).toFixed(1);
+        const html = `
+          <span class="polaroid-inline" style="transform:rotate(${rotation}deg)" contenteditable="false">
+            <img src="${reader.result}" alt="polaroid photo" />
+            <span class="polaroid-caption-text">✦ memory ✦</span>
+            <button class="polaroid-remove" onclick="this.parentElement.remove()">✕</button>
+          </span>`;
+        insertHTMLAtSavedRange(html);
+        closePopover();
+      };
+      reader.readAsDataURL(file);
+    });
+
+    wrap.appendChild(chooseBtn);
+    wrap.appendChild(fileInput);
+    return wrap;
+  }
+
+  /* ---------- wire up buttons ---------- */
+
+  function wire(id, titleText, bodyBuilder) {
+    const btn = document.getElementById(id);
+    if (!btn) return;
+    btn.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      openPopover(btn, titleText, bodyBuilder());
+    });
+  }
+
+  wire("stickerBtn", "💟 Choose a Sticker", buildStickerBody);
+  wire("tapeBtn", "୨ৎ Choose a Tape", buildTapeBody);
+  wire("doodleBtn", "꩜ Choose a Doodle", buildDoodleBody);
+  wire("polaroidBtn", "🔳 Add a Polaroid", buildPolaroidBody);
+})();
 
 
 

@@ -1,0 +1,121 @@
+/* Container Padding & Base Setup */
+.dashboard-notes-section[data-journal-notes="dream"] {
+  padding: 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* Note Composer Container */
+.dashboard-notes-section .journal-note-composer {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  background: rgba(255, 255, 255, 0.4);
+  padding: 20px;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+/* Fields Styling (Title, Content, Search) */
+.dashboard-notes-section .journal-note-composer input.journal-note-title,
+.dashboard-notes-section .journal-note-composer textarea.journal-note-content,
+.dashboard-notes-section .journal-notes-history input.journal-note-search {
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-radius: 12px;
+  padding: 12px 16px;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  color: #2c2c2c;
+  outline: none;
+  transition: all 0.2s ease-in-out;
+}
+
+/* Focus State with an Ethereal/Dreamy Indigo-Violet Glow */
+.dashboard-notes-section .journal-note-composer input.journal-note-title:focus,
+.dashboard-notes-section .journal-note-composer textarea.journal-note-content:focus,
+.dashboard-notes-section .journal-notes-history input.journal-note-search:focus {
+  border-color: #a78bfa; /* Soft violet */
+  box-shadow: 0 0 0 3px rgba(167, 139, 250, 0.25);
+}
+
+/* Field Specifics */
+.dashboard-notes-section .journal-note-composer input.journal-note-title {
+  font-weight: 600;
+  font-size: 16px;
+}
+
+.dashboard-notes-section .journal-note-composer textarea.journal-note-content {
+  resize: vertical;
+  min-height: 110px;
+  line-height: 1.5;
+}
+
+/* Action Buttons Positioning */
+.dashboard-notes-section .journal-note-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 4px;
+}
+
+/* History Feed Wrapper */
+.dashboard-notes-section .journal-notes-history {
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.dashboard-notes-section .journal-notes-history input.journal-note-search {
+  width: 100%;
+  max-width: 360px;
+  height: 44px;
+}
+
+/* Responsive Grid for Saved Dream Notes */
+.dashboard-notes-section .journal-notes-feed {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+  gap: 18px;
+  margin-top: 10px;
+}
+
+/* Rendered Note Cards (.dashboard-card) */
+.dashboard-notes-section .dashboard-card {
+  background: rgba(255, 255, 255, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.85);
+  border-radius: 18px;
+  padding: 20px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.015);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.25s ease;
+}
+
+.dashboard-notes-section .dashboard-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(167, 139, 250, 0.08); /* Gentle purple tint shadow */
+}
+
+/* Empty State UI */
+.journal-notes-empty {
+  text-align: center;
+  padding: 45px 20px;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 16px;
+  border: 1px dashed rgba(255, 255, 255, 0.5);
+  margin-top: 10px;
+}
+
+.journal-notes-empty h3 {
+  color: #3b3b4f;
+  margin-bottom: 6px;
+}
+
+.journal-notes-empty p {
+  color: #6b6b7c;
+  font-size: 14px;
+}
