@@ -74,6 +74,35 @@
           <div class="workspace-hero travel-theme">
             <h1>✈️ Travel Journal</h1>
           </div>
+
+          <section class="glass dashboard-notes-section" data-journal-notes="travel">
+            <div class="section-header">
+              <h2>💗᪲᪲᪲ Notes</h2>
+              <span class="muted">Save travel notes & keep history</span>
+            </div>
+
+            <div class="journal-note-composer">
+              <input type="text" class="journal-note-title" placeholder="Note title..." />
+              <textarea class="journal-note-content" rows="4" placeholder="Write your note..."></textarea>
+              <div class="journal-note-actions">
+                <button type="button" class="primary-btn journal-note-save">Save Note</button>
+                <button type="button" class="secondary-btn journal-note-clear">Clear</button>
+              </div>
+            </div>
+
+            <div class="journal-notes-history">
+              <div class="section-header">
+                <h2>Memory Feed</h2>
+                <input type="text" class="journal-note-search" placeholder="Search notes..." />
+              </div>
+              <div class="journal-notes-feed" aria-live="polite"></div>
+              <div class="journal-notes-empty" hidden>
+                <h3>😶‍🌫 No travel notes yet</h3>
+                <p>Write your first note above.</p>
+              </div>
+            </div>
+          </section>
+
           <div class="workspace-placeholder glass">
             Travel Stories Gallery Places Bucket List Timeline
           </div>
@@ -84,5 +113,7 @@
     <div id="memoryModal" class="modal"><div class="modal-content glass"><button id="closeModal">✕</button><div id="modalBody"></div></div></div>
     <div id="toastContainer"></div>
     <script src="../script.js"></script>
+    <script src="../modules/journal-notes.js"></script>
   </body>
 </html>
+
