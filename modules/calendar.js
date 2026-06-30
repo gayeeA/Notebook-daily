@@ -350,7 +350,7 @@ function openDayEntries(
 
     let html = `
         <h2>
-            ðŸ“… ${dateString}
+            🗓️ ${dateString}
         </h2>
     `;
 

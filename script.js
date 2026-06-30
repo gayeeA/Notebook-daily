@@ -257,7 +257,7 @@ function login(password){
     false;
 
     showToast(
-        "Welcome Back ðŸŒ¸",
+        "Welcome Back 🧸ིྀ",
         "success"
     );
 
@@ -1810,21 +1810,21 @@ function createMemoryCard(entry){
                     class="action-btn favorite-btn"
                     data-id="${entry.id}"
                 >
-                    ${entry.favorite ? "â­" : "â˜†"}
+                    ${entry.favorite ? "❤️" : "❤︎"}
                 </button>
 
                 <button
                     class="action-btn pin-btn"
                     data-id="${entry.id}"
                 >
-                    ${entry.pinned ? "ðŸ“Œ" : "ðŸ“"}
+                    ${entry.pinned ? "📌" : "⚲"}
                 </button>
 
                 <button
                     class="action-btn delete-btn"
                     data-id="${entry.id}"
                 >
-                    ðŸ—‘
+                    🗑️
                 </button>
 
             </div>
@@ -2480,7 +2480,7 @@ function updateAnalytics(){
     if(streakCount){
 
         streakCount.textContent =
-        `${streak}ðŸ”¥`;
+        `${streak}🔥`;
 
     }
 
@@ -2870,7 +2870,7 @@ window.MyDiary = {
 };
 
 console.log(
-    "ðŸ“– MyDiary V3 Loaded"
+    "˚˖𓍢ִ໋🌷͙֒✧˚.🎀༘⋆ MyDiary V3 Loaded"
 );
 document
 .getElementById(
