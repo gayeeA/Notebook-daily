@@ -3428,10 +3428,3 @@ createMemoryCard(entry)
   wire("polaroidBtn", "🔳 Add a Polaroid", buildPolaroidBody);
 })();
 
-
-
-
-
-
-
-
