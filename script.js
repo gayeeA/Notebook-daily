@@ -52,6 +52,8 @@ const state = {
 
 };
 
+window.state = state;
+
 /* ==========================================================
    DOM REFERENCES
 ========================================================== */
@@ -328,6 +330,50 @@ document
 ?.addEventListener(
     "click",
     logout
+);
+
+document
+.getElementById("exportJSONBtn")
+?.addEventListener(
+    "click",
+    exportJSON
+);
+
+document
+.getElementById("importJSONBtn")
+?.addEventListener(
+    "click",
+    ()=>{
+        document
+        .getElementById(
+            "importJSONFile"
+        )
+        ?.click();
+    }
+);
+
+document
+.getElementById("importJSONFile")
+?.addEventListener(
+    "change",
+    (event)=>{
+        const file =
+            event.target.files &&
+            event.target.files[0];
+
+        if(file){
+            importJSON(file);
+        }
+
+        event.target.value = "";
+    }
+);
+
+document
+.getElementById("themeToggleBtn")
+?.addEventListener(
+    "click",
+    toggleTheme
 );
 
 /* ==========================================================
@@ -1573,11 +1619,120 @@ function validateEntry(){
 
 }
 
+const CLOUD_SHEET_TAB = "MilkLogs";
+
+function dataURLToBlob(dataURL){
+    const parts = dataURL.split(",");
+    const mimeMatch = parts[0].match(/data:(.*?);/);
+    const raw = atob(parts[1] || "");
+    const buffer = new Uint8Array(raw.length);
+
+    for(let i = 0; i < raw.length; i++){
+        buffer[i] = raw.charCodeAt(i);
+    }
+
+    return new Blob([buffer], {
+        type: mimeMatch ? mimeMatch[1] : "application/octet-stream",
+    });
+}
+
+function getDriveFileName(entry, mimeType, index){
+    const safeTitle = entry.title
+        .replace(/[^a-zA-Z0-9-_ ]/g, "")
+        .trim()
+        .slice(0, 40) || "diary-entry";
+    const extension = mimeType.split("/")[1] || "png";
+    return `${safeTitle}-${index + 1}.${extension}`;
+}
+
+async function saveEntryToCloud(entry){
+    if(typeof logRow !== "function"){
+        throw new Error("Cloud sync helper is not loaded.");
+    }
+
+    let webViewLink = "";
+    let webContentLink = "";
+
+    if(entry.images && entry.images.length > 0){
+        const firstImage = entry.images.find(
+            (image) => typeof image === "string" && image.startsWith("data:")
+        );
+
+        if(firstImage){
+            const blob = dataURLToBlob(firstImage);
+            const fileName = getDriveFileName(entry, blob.type, 0);
+            const file = new File([blob], fileName, { type: blob.type });
+            const uploadResult = await uploadDeliveryFile(file);
+
+            webViewLink = uploadResult.webViewLink || "";
+            webContentLink = uploadResult.webContentLink || "";
+        }
+    }
+
+    await logRow(CLOUD_SHEET_TAB, [
+        entry.createdAt,
+        entry.title,
+        entry.mood,
+        entry.weather,
+        entry.plainText,
+        webViewLink,
+        webContentLink,
+    ]);
+
+    return { webViewLink, webContentLink };
+}
+
+// Cloud sync UI wiring
+if (typeof window.cloudSyncEnabled === "undefined") {
+    window.cloudSyncEnabled = true;
+}
+
+function updateCloudStatusUI(){
+    const statusEl = document.getElementById("cloudSyncStatus");
+    const toggle = document.getElementById("cloudSyncToggle");
+    const available = (typeof logRow === "function" && typeof uploadDeliveryFile === "function");
+
+    if(toggle){
+        toggle.checked = !!window.cloudSyncEnabled;
+    }
+
+    if(!statusEl) return;
+
+    if(!available){
+        statusEl.textContent = "Cloud: unavailable";
+        statusEl.classList.add("cloud-unavailable");
+        statusEl.classList.remove("cloud-enabled","cloud-disabled");
+        return;
+    }
+
+    if(window.cloudSyncEnabled){
+        statusEl.textContent = "Cloud: enabled";
+        statusEl.classList.add("cloud-enabled");
+        statusEl.classList.remove("cloud-disabled","cloud-unavailable");
+    } else {
+        statusEl.textContent = "Cloud: disabled";
+        statusEl.classList.add("cloud-disabled");
+        statusEl.classList.remove("cloud-enabled","cloud-unavailable");
+    }
+}
+
+document.addEventListener("DOMContentLoaded", ()=>{
+    const toggle = document.getElementById("cloudSyncToggle");
+    if(toggle){
+        toggle.addEventListener("change", (e)=>{
+            window.cloudSyncEnabled = !!e.target.checked;
+            updateCloudStatusUI();
+        });
+    }
+    // Call once to set initial state
+    setTimeout(updateCloudStatusUI, 100);
+});
+
 /* ==========================================================
    SAVE ENTRY
 ========================================================== */
 
-function saveEntry(){
+async function saveEntry(){
 
     if(!validateEntry())
         return;
@@ -1622,10 +1777,28 @@ function saveEntry(){
 
     updateAnalytics();
 
-    showToast(
-        `Entry saved to ${capitalize(targetJournal)}`,
-        "success"
-    );
+    const cloudAvailable =
+        typeof logRow === "function" &&
+        typeof uploadDeliveryFile === "function";
+    const cloudEnabled = cloudAvailable && !!window.cloudSyncEnabled;
+
+    if(cloudEnabled){
+        try {
+            const result = await saveEntryToCloud(entry);
+            const message = result.webViewLink
+                ? "Saved locally and cloud-synced to Sheets + Drive"
+                : "Saved locally and synced row to Sheets";
+            showToast(message, "success");
+        } catch (err) {
+            console.error(err);
+            showToast(`Saved locally. Cloud sync failed: ${err.message}`, "warning");
+        }
+    } else {
+        showToast(
+            `Entry saved to ${capitalize(targetJournal)}`,
+            "success"
+        );
+    }
 
 }
 
@@ -2916,7 +3089,13 @@ document
 document.querySelectorAll(".nav-item")
 .forEach(btn => {
 
-    btn.addEventListener("click", () => {
+    btn.addEventListener("click", (e) => {
+
+        const href = btn.getAttribute("href");
+
+        if (!href || href === "#" || href === "javascript:void(0)") {
+            e.preventDefault();
+        }
 
         if(
             appShell &&
@@ -3042,24 +3221,6 @@ window.MyDiaryCalendar.refreshCalendar();
 }
 
 }
-document
-.getElementById(
-"exportPDFBtn"
-)
-?.addEventListener(
-"click",
-()=>{
-
-if(
-window.MyDiaryPDF
-){
-
-MyDiaryPDF.exportCurrentEntry();
-
-}
-
-}
-);
 document
 .getElementById(
 "changePasswordBtn"

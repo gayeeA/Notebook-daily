@@ -318,6 +318,10 @@ async function exportAllEntriesPDF() {
 
 }
 
+async function exportCurrentEntry() {
+    return exportCurrentEntryPDF();
+}
+
 /* ==========================================================
    EXPORT ACTIVE JOURNAL
 ========================================================== */

@@ -368,11 +368,14 @@
               <button id="saveEntryBtn" class="primary-btn">Save Memory</button>
 
               <button id="clearEntryBtn" class="secondary-btn">Clear</button>
-              <button
-    id="exportPDFBtn"
-    class="secondary-btn">
-    Export PDF
-</button>
+              <button id="exportPDFBtn" class="secondary-btn">Export PDF</button>
+
+              <label class="cloud-toggle">
+                <input type="checkbox" id="cloudSyncToggle" checked />
+                <span>Save to Cloud</span>
+              </label>
+
+              <span id="cloudSyncStatus" class="cloud-status">Cloud: checking...</span>
             </div>
           </section>
 
@@ -538,8 +541,7 @@
 <!-- CALENDAR VIEW -->
 <!-- ===================================================== -->
 
-<section id="calendarWorkspace" class="glass dashboard-section" hidden
-class="workspace">
+<section id="calendarWorkspace" class="glass dashboard-section workspace" hidden>
 
     <div class="section-header">
         <h2>Ⓜ Memory Calendar</h2>
@@ -817,16 +819,14 @@ class="workspace">
 
 
     <script src="script.js"></script>
+    <script src="modules/cloud-sync.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="modules/calendar.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="modules/indexeddb.js"></script>
 
 <script src="modules/pdf-export.js"></script>
 
 <script src="modules/mood-charts.js"></script>
-
-<script src="modules/password.js"></script>
 
 <script src="modules/dashboards.js"></script>
 
@@ -837,7 +837,6 @@ class="workspace">
 <script src="modules/gallery.js"></script>
 
 <script src="modules/heatmap.js"></script>
-<script src="modules/cloud-sync.js"></script>
 <script src="modules/scrapbook.js"></script>
 
   </body>

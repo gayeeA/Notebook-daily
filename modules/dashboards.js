@@ -70,12 +70,39 @@ function saveJournal(name) {
 
 }
 
+function readJournalEntries(journal) {
+
+    try {
+        const raw = localStorage.getItem(
+            `mydiary_${journal}`
+        );
+        return raw ? JSON.parse(raw) : [];
+    }
+    catch {
+        return [];
+    }
+
+}
+
 function getEntries() {
 
-    return JSON.parse(
-        localStorage.getItem(
-            "myDiaryEntries"
-        ) || "[]"
+    if (
+        window.state &&
+        Array.isArray(window.state.entries)
+    ) {
+        return window.state.entries;
+    }
+
+    const journals = [
+        "personal",
+        "work",
+        "travel",
+        "study",
+        "dream"
+    ];
+
+    return journals.flatMap(journal =>
+        readJournalEntries(journal)
     );
 
 }
