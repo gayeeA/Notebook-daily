@@ -24,6 +24,26 @@ const SPREADSHEET_ID = process.env.GOOGLE_SHEET_ID;
 
 let sheetsClient = null;
 
+function normalizeSheetName(sheetName) {
+  return String(sheetName || "")
+    .trim()
+    .replace(/[\u0000-\u001f\u007f]/g, "");
+}
+
+function quoteSheetName(sheetName) {
+  const normalizedName = normalizeSheetName(sheetName);
+
+  if (!normalizedName) {
+    throw new Error("Sheet name is required.");
+  }
+
+  return `'${normalizedName.replace(/'/g, "''")}'`;
+}
+
+function sheetRange(sheetName, range) {
+  return `${quoteSheetName(sheetName)}!${range}`;
+}
+
 /**
  * initSheet()
  * Creates (or reuses) an authenticated Sheets API client.
@@ -45,6 +65,60 @@ function initSheet() {
   return sheetsClient;
 }
 
+async function getSpreadsheetMetadata() {
+  const sheets = initSheet();
+  const response = await sheets.spreadsheets.get({
+    spreadsheetId: SPREADSHEET_ID,
+    fields: "sheets.properties",
+  });
+  return response.data.sheets || [];
+}
+
+async function sheetExists(sheetName) {
+  const normalizedName = normalizeSheetName(sheetName);
+  const sheets = await getSpreadsheetMetadata();
+  return sheets.some((sheet) => sheet.properties.title === normalizedName);
+}
+
+async function createSheetIfMissing(sheetName) {
+  const normalizedName = normalizeSheetName(sheetName);
+  const sheets = initSheet();
+  const exists = await sheetExists(normalizedName);
+  if (exists) return;
+
+  await sheets.spreadsheets.batchUpdate({
+    spreadsheetId: SPREADSHEET_ID,
+    requestBody: {
+      requests: [
+        {
+          addSheet: {
+            properties: {
+              title: normalizedName,
+            },
+          },
+        },
+      ],
+    },
+  });
+
+  await sheets.spreadsheets.values.update({
+    spreadsheetId: SPREADSHEET_ID,
+    range: sheetRange(normalizedName, "A1:G1"),
+    valueInputOption: "USER_ENTERED",
+    requestBody: {
+      values: [[
+        "Date",
+        "Title",
+        "Mood",
+        "Weather",
+        "Content",
+        "webViewLink",
+        "webContentLink",
+      ]],
+    },
+  });
+}
+
 /**
  * appendRow(sheetName, dataArray)
  * Appends one new row to the given tab.
@@ -60,11 +134,14 @@ function initSheet() {
  * so it's wrapped in one extra array: [dataArray].
  */
 async function appendRow(sheetName, dataArray) {
+  const normalizedName = normalizeSheetName(sheetName);
+  await createSheetIfMissing(normalizedName);
+
   const sheets = initSheet();
 
   const response = await sheets.spreadsheets.values.append({
     spreadsheetId: SPREADSHEET_ID,
-    range: `${sheetName}!A:Z`, // A:Z = "any column on this tab"
+    range: sheetRange(normalizedName, "A1:Z"),
     valueInputOption: "USER_ENTERED", // lets Sheets auto-parse dates/numbers
     insertDataOption: "INSERT_ROWS",
     requestBody: {
@@ -86,11 +163,14 @@ async function appendRow(sheetName, dataArray) {
  *          your header row — strip it in the caller if needed)
  */
 async function readRows(sheetName) {
+  const normalizedName = normalizeSheetName(sheetName);
+  await createSheetIfMissing(normalizedName);
+
   const sheets = initSheet();
 
   const response = await sheets.spreadsheets.values.get({
     spreadsheetId: SPREADSHEET_ID,
-    range: `${sheetName}!A:Z`,
+    range: sheetRange(normalizedName, "A1:Z"),
   });
 
   // The API omits `values` entirely if the range is empty —

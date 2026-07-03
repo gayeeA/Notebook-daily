@@ -60,41 +60,58 @@ async function uploadDeliveryFile(fileName, fileBuffer, mimeType) {
   bufferStream.push(null);
 
   // Step 1: upload the file + metadata in one call.
-  const uploadResponse = await drive.files.create({
-    requestBody: {
-      name: fileName,
-      parents: [DRIVE_FOLDER_ID], // places file directly in your shared folder
-    },
-    media: {
-      mimeType,
-      body: bufferStream,
-    },
-    fields: "id, webViewLink, webContentLink",
-  });
+  try {
+    const uploadResponse = await drive.files.create({
+      requestBody: {
+        name: fileName,
+        parents: [DRIVE_FOLDER_ID], // places file directly in your shared folder
+      },
+      media: {
+        mimeType,
+        body: bufferStream,
+      },
+      fields: "id, webViewLink, webContentLink",
+      supportsAllDrives: true,
+    });
 
-  const fileId = uploadResponse.data.id;
+    const fileId = uploadResponse.data.id;
 
-  // Step 2: a Service Account's uploads are NOT public by default.
-  // Anyone you want to be able to open these links (e.g. you, viewing
-  // your own Sheet) needs at least "reader" access. This makes the
-  // single uploaded file readable by anyone with the link, which is
-  // usually what you want for receipt/delivery photos referenced from
-  // a Sheet. Skip this call if you'd rather keep files private and
-  // only accessible to accounts you explicitly share with.
-  await drive.permissions.create({
-    fileId,
-    requestBody: {
-      role: "reader",
-      type: "anyone",
-    },
-  });
+    // Step 2: a Service Account's uploads are NOT public by default.
+    // Anyone you want to be able to open these links (e.g. you, viewing
+    // your own Sheet) needs at least "reader" access. This makes the
+    // single uploaded file readable by anyone with the link.
+    await drive.permissions.create({
+      fileId,
+      requestBody: {
+        role: "reader",
+        type: "anyone",
+      },
+      supportsAllDrives: true,
+    });
 
-  // Re-fetch with the now-public links populated (webContentLink in
-  // particular is only reliably present after permissions are set).
-  const finalFile = await drive.files.get({
-    fileId,
-    fields: "id, webViewLink, webContentLink",
-  });
+    // Re-fetch with the now-public links populated.
+    const finalFile = await drive.files.get({
+      fileId,
+      fields: "id, webViewLink, webContentLink",
+      supportsAllDrives: true,
+    });
+
+    return {
+      fileId: finalFile.data.id,
+      webViewLink: finalFile.data.webViewLink,
+      webContentLink: finalFile.data.webContentLink,
+    };
+  } catch (err) {
+    const message =
+      err?.errors?.[0]?.message ||
+      err?.response?.data?.error?.message ||
+      err.message ||
+      "Drive upload failed.";
+
+    throw new Error(
+      `Drive upload failed. Make sure the folder is a shared drive or the service account has access. ${message}`
+    );
+  }
 
   return {
     fileId: finalFile.data.id,

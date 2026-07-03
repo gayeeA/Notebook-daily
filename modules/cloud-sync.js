@@ -6,14 +6,18 @@
  * Adjust API_BASE if your backend runs on a different host/port.
  */
 
-const API_BASE = "http://localhost:4000/api";
+const API_BASE = `${window.location.origin}/api`;
+
+function getSheetApiPath(sheetName) {
+  return `${API_BASE}/logs/${encodeURIComponent(sheetName)}`;
+}
 
 /**
  * Append a row of data, e.g. a milk log or delivery record.
  *   logRow("MilkLogs", ["2026-06-30", "Ravi", "2L", "Delivered"])
  */
 async function logRow(sheetName, dataArray) {
-  const res = await fetch(`${API_BASE}/logs/${sheetName}`, {
+  const res = await fetch(getSheetApiPath(sheetName), {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ data: dataArray }),
@@ -27,7 +31,7 @@ async function logRow(sheetName, dataArray) {
  *   const orders = await getRows("Orders");
  */
 async function getRows(sheetName) {
-  const res = await fetch(`${API_BASE}/logs/${sheetName}`);
+  const res = await fetch(getSheetApiPath(sheetName));
   if (!res.ok) throw new Error((await res.json()).error || "Failed to fetch rows");
   const { rows } = await res.json();
   return rows;

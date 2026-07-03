@@ -19,27 +19,44 @@
 const { google } = require("googleapis");
 
 function getGoogleAuth() {
+  const oauthClientId = process.env.GOOGLE_OAUTH_CLIENT_ID;
+  const oauthClientSecret = process.env.GOOGLE_OAUTH_CLIENT_SECRET;
+  const oauthRefreshToken = process.env.GOOGLE_OAUTH_REFRESH_TOKEN;
+
+  if (oauthClientId && oauthClientSecret && oauthRefreshToken) {
+    const auth = new google.auth.OAuth2(
+      oauthClientId,
+      oauthClientSecret
+    );
+
+    auth.setCredentials({
+      refresh_token: oauthRefreshToken,
+    });
+
+    return auth;
+  }
+
   const clientEmail = process.env.GOOGLE_CLIENT_EMAIL;
   // .env stores literal "\n" characters; real newlines are required
   // by the JWT signer, so we convert them back here.
   const privateKey = (process.env.GOOGLE_PRIVATE_KEY || "").replace(/\\n/g, "\n");
 
-  if (!clientEmail || !privateKey) {
-    throw new Error(
-      "Missing GOOGLE_CLIENT_EMAIL or GOOGLE_PRIVATE_KEY in environment variables."
-    );
+  if (clientEmail && privateKey) {
+    const auth = new google.auth.JWT({
+      email: clientEmail,
+      key: privateKey,
+      scopes: [
+        "https://www.googleapis.com/auth/spreadsheets",
+        "https://www.googleapis.com/auth/drive",
+      ],
+    });
+
+    return auth;
   }
 
-  const auth = new google.auth.JWT({
-    email: clientEmail,
-    key: privateKey,
-    scopes: [
-      "https://www.googleapis.com/auth/spreadsheets",
-      "https://www.googleapis.com/auth/drive",
-    ],
-  });
-
-  return auth;
+  throw new Error(
+    "Missing Google auth configuration. Set either service account env vars (GOOGLE_CLIENT_EMAIL + GOOGLE_PRIVATE_KEY) or OAuth vars (GOOGLE_OAUTH_CLIENT_ID + GOOGLE_OAUTH_CLIENT_SECRET + GOOGLE_OAUTH_REFRESH_TOKEN)."
+  );
 }
 
 // Reuse a single auth instance across the app instead of

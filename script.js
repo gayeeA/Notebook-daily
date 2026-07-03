@@ -27,6 +27,14 @@ const JOURNALS = [
     "dream"
 ];
 
+const JOURNAL_SHEET_NAME_MAP = {
+    personal: "Personal",
+    work: "Work",
+    travel: "Travel",
+    study: "Study",
+    dream: "Dreams",
+};
+
 /* ==========================================================
    APP STATE
 ========================================================== */
@@ -1488,6 +1496,31 @@ document.getElementById(
     "saveEntryBtn"
 );
 
+const syncPersonalBtn =
+document.getElementById(
+    "syncPersonalBtn"
+);
+
+const syncWorkBtn =
+document.getElementById(
+    "syncWorkBtn"
+);
+
+const syncTravelBtn =
+document.getElementById(
+    "syncTravelBtn"
+);
+
+const syncStudyBtn =
+document.getElementById(
+    "syncStudyBtn"
+);
+
+const syncDreamBtn =
+document.getElementById(
+    "syncDreamBtn"
+);
+
 const memoryFeed =
 document.getElementById(
     "memoryFeed"
@@ -1619,7 +1652,21 @@ function validateEntry(){
 
 }
 
-const CLOUD_SHEET_TAB = "MilkLogs";
+function getSheetNameForJournal(journal){
+    return JOURNAL_SHEET_NAME_MAP[journal] || capitalize(journal);
+}
+
+function getCloudSheetRow(entry){
+    return [
+        entry.createdAt,
+        entry.title,
+        entry.mood,
+        entry.weather,
+        entry.plainText,
+        "",
+        "",
+    ];
+}
 
 function dataURLToBlob(dataURL){
     const parts = dataURL.split(",");
@@ -1650,6 +1697,10 @@ async function saveEntryToCloud(entry){
         throw new Error("Cloud sync helper is not loaded.");
     }
 
+    const sheetName = getSheetNameForJournal(
+        entry.journal || state.activeJournal
+    );
+
     let webViewLink = "";
     let webContentLink = "";
 
@@ -1669,7 +1720,7 @@ async function saveEntryToCloud(entry){
         }
     }
 
-    await logRow(CLOUD_SHEET_TAB, [
+    await logRow(sheetName, [
         entry.createdAt,
         entry.title,
         entry.mood,
@@ -1680,6 +1731,53 @@ async function saveEntryToCloud(entry){
     ]);
 
     return { webViewLink, webContentLink };
+}
+
+async function syncJournalToCloud(journal){
+    if(typeof logRow !== "function"){
+        showToast("Cloud sync helper is not loaded.", "error");
+        return;
+    }
+
+    const rows = loadEntriesForJournal(journal);
+    if(!rows.length){
+        showToast(
+            `No entries found for ${capitalize(journal)}.`,
+            "warning"
+        );
+        return;
+    }
+
+    const sheetName = getSheetNameForJournal(journal);
+    showToast(
+        `Syncing ${rows.length} ${capitalize(journal)} entries to ${sheetName}...`,
+        "info"
+    );
+
+    let successCount = 0;
+    const errors = [];
+
+    for(const entry of rows){
+        try {
+            await logRow(sheetName, getCloudSheetRow(entry));
+            successCount += 1;
+        } catch (err) {
+            console.error(`Sync failed for ${journal}:`, err);
+            errors.push(err.message || err.toString());
+        }
+    }
+
+    if(errors.length === 0){
+        showToast(
+            `Synced ${successCount} ${capitalize(journal)} entries to ${sheetName}.`,
+            "success"
+        );
+    } else {
+        showToast(
+            `Synced ${successCount} entries; ${errors.length} failed.`,
+            "warning"
+        );
+    }
 }
 
 // Cloud sync UI wiring
@@ -1724,6 +1822,32 @@ document.addEventListener("DOMContentLoaded", ()=>{
             updateCloudStatusUI();
         });
     }
+
+    syncPersonalBtn?.addEventListener(
+        "click",
+        ()=> syncJournalToCloud("personal")
+    );
+
+    syncWorkBtn?.addEventListener(
+        "click",
+        ()=> syncJournalToCloud("work")
+    );
+
+    syncTravelBtn?.addEventListener(
+        "click",
+        ()=> syncJournalToCloud("travel")
+    );
+
+    syncStudyBtn?.addEventListener(
+        "click",
+        ()=> syncJournalToCloud("study")
+    );
+
+    syncDreamBtn?.addEventListener(
+        "click",
+        ()=> syncJournalToCloud("dream")
+    );
+
     // Call once to set initial state
     setTimeout(updateCloudStatusUI, 100);
 });

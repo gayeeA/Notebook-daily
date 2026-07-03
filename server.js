@@ -34,6 +34,7 @@ const ROOT = __dirname;
 
 // Single root-level files
 app.get("/", (req, res) => res.sendFile(path.join(ROOT, "index.html")));
+app.get("/index.html", (req, res) => res.sendFile(path.join(ROOT, "index.html")));
 app.get("/styles.css", (req, res) => res.sendFile(path.join(ROOT, "styles.css")));
 app.get("/script.js", (req, res) => res.sendFile(path.join(ROOT, "script.js")));
 
@@ -42,6 +43,7 @@ app.use("/modules", express.static(path.join(ROOT, "modules")));
 app.use("/pages", express.static(path.join(ROOT, "pages")));
 app.use("/assets", express.static(path.join(ROOT, "assets")));
 app.use("/styles", express.static(path.join(ROOT, "styles")));
+app.use("/sidebar", express.static(path.join(ROOT, "sidebar")));
 
 // NOTE: config/, services/, routes/, data/, .env, and server.js
 // are intentionally NOT exposed here. Don't add a catch-all

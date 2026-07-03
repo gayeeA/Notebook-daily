@@ -37,7 +37,9 @@ This app is designed to use Google Sheets as a lightweight database and Google D
 
 ### Required environment variables
 
-Create a `.env` file in the project root with:
+Create a `.env` file in the project root with either the service account variables or OAuth variables.
+
+#### Option A: Service account (current default)
 
 ```env
 GOOGLE_CLIENT_EMAIL=your-service-account-email@your-project.iam.gserviceaccount.com
@@ -49,12 +51,25 @@ PORT=4000
 
 > Note: the private key must preserve newlines as `\n` when stored in `.env`.
 
+#### Option B: OAuth 2.0 with your personal Gmail
+
+```env
+GOOGLE_OAUTH_CLIENT_ID=your-oauth-client-id.apps.googleusercontent.com
+GOOGLE_OAUTH_CLIENT_SECRET=your-oauth-client-secret
+GOOGLE_OAUTH_REFRESH_TOKEN=your-refresh-token
+GOOGLE_DRIVE_FOLDER_ID=YOUR_DRIVE_FOLDER_ID
+GOOGLE_SHEET_ID=YOUR_GOOGLE_SHEET_ID
+PORT=4000
+```
+
 ### Service account setup checklist
 
 1. Enable Google Drive API and Google Sheets API in Google Cloud Console.
 2. Create a service account and download the JSON key.
 3. Copy `client_email` from the JSON into `GOOGLE_CLIENT_EMAIL`.
 4. Share your Drive folder with that service account email as Editor.
+   - If you are using a shared drive, make sure the folder is inside the shared drive and that the service account is a member of that shared drive.
+   - Drive API uploads from service accounts work best when the folder is a shared drive folder.
 5. Share the Google Sheet with that service account email as Editor.
 
 ### How data should flow
@@ -90,6 +105,80 @@ async function saveDiaryEntry(entry, file) {
   ]);
 }
 ```
+
+### OAuth helper script
+
+To generate a refresh token for personal Gmail OAuth, use these exact steps.
+
+1. In Google Cloud Console, go to `APIs & Services > Credentials`.
+2. Click `Create Credentials` and choose `OAuth client ID`.
+3. Choose `Desktop app` and give it a name like `MyDiary OAuth`.
+4. Download the JSON file and save it as `oauth_client_secret.json` in your project root.
+5. Run:
+
+```bash
+npm install
+node generate_oauth_refresh_token.js
+```
+
+6. Copy the printed `GOOGLE_OAUTH_CLIENT_ID`, `GOOGLE_OAUTH_CLIENT_SECRET`, and `GOOGLE_OAUTH_REFRESH_TOKEN` into `.env`.
+
+#### Example `.env` for OAuth
+
+```env
+GOOGLE_OAUTH_CLIENT_ID=your-oauth-client-id.apps.googleusercontent.com
+GOOGLE_OAUTH_CLIENT_SECRET=your-oauth-client-secret
+GOOGLE_OAUTH_REFRESH_TOKEN=your-refresh-token
+GOOGLE_DRIVE_FOLDER_ID=YOUR_DRIVE_FOLDER_ID
+GOOGLE_SHEET_ID=YOUR_GOOGLE_SHEET_ID
+PORT=4000
+```
+
+### Testing with Postman
+
+You can verify the backend APIs in Postman before using the UI.
+
+1. Start the server:
+
+```bash
+npm start
+```
+
+2. Test the Sheets write endpoint:
+
+- Method: `POST`
+- URL: `http://localhost:4000/api/logs/MilkLogs`
+- Body type: `raw`
+- Body JSON:
+
+```json
+{
+  "data": [
+    "2026-07-03",
+    "Test entry",
+    "Happy",
+    "Sunny",
+    "This is a test entry",
+    "",
+    ""
+  ]
+}
+```
+
+3. Test the Sheets read endpoint:
+
+- Method: `GET`
+- URL: `http://localhost:4000/api/logs/MilkLogs`
+
+4. Test the Drive upload endpoint:
+
+- Method: `POST`
+- URL: `http://localhost:4000/api/upload`
+- Body type: `form-data`
+- Key: `file`
+- Value: choose a local image or PDF file
+
+If Postman succeeds, the app should also be able to save entries without delay.
 
 ### Important note
 
