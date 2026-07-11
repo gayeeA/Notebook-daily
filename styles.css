@@ -2374,3 +2374,14 @@ select,
     font-size:18px;
 
 }
+.todo-empty{
+
+    text-align:center;
+
+    padding:20px;
+
+    color:#888;
+
+    font-style:italic;
+
+}

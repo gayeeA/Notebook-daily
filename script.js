@@ -3713,9 +3713,11 @@ createMemoryCard(entry)
   wire("polaroidBtn", "🔳 Add a Polaroid", buildPolaroidBody);
 })();
 
-/* ==========================
+/* ==========================================
    TODAY TODO
-========================== */
+========================================== */
+
+const TODO_KEY = "mydiary_today_todos";
 
 const todoInput =
 document.getElementById("todoInput");
@@ -3726,13 +3728,188 @@ document.getElementById("addTodoBtn");
 const todoList =
 document.getElementById("todoList");
 
+let todos = [];
+
+/* ==========================================
+   LOAD
+========================================== */
+
+function loadTodos(){
+
+    try{
+
+        todos =
+        JSON.parse(
+            localStorage.getItem(TODO_KEY)
+        ) || [];
+
+    }
+    catch{
+
+        todos = [];
+
+    }
+
+    renderTodos();
+
+}
+
+/* ==========================================
+   SAVE
+========================================== */
+
+function saveTodos(){
+
+    localStorage.setItem(
+        TODO_KEY,
+        JSON.stringify(todos)
+    );
+
+}
+
+/* ==========================================
+   ADD
+========================================== */
+
+function addTodo(){
+
+    const text =
+    todoInput.value.trim();
+
+    if(!text) return;
+
+    todos.push({
+
+        id: Date.now(),
+
+        text,
+
+        completed:false
+
+    });
+
+    saveTodos();
+
+    renderTodos();
+
+    todoInput.value = "";
+
+    todoInput.focus();
+
+}
+
+/* ==========================================
+   RENDER
+========================================== */
+
+function renderTodos(){
+
+    todoList.innerHTML = "";
+
+    if(todos.length===0){
+
+        todoList.innerHTML = `
+
+            <li class="todo-empty">
+
+                🌸 No tasks for today
+
+            </li>
+
+        `;
+
+        return;
+
+    }
+
+    todos.forEach(todo=>{
+
+        const li =
+        document.createElement("li");
+
+        li.className =
+        "todo-item";
+
+        li.innerHTML = `
+
+            <div class="todo-left">
+
+                <input
+                    type="checkbox"
+                    ${todo.completed ? "checked" : ""}
+                >
+
+                <span
+                    class="todo-text ${todo.completed ? "done" : ""}">
+
+                    ${todo.text}
+
+                </span>
+
+            </div>
+
+            <button
+                class="todo-delete">
+
+                🗑
+
+            </button>
+
+        `;
+
+        /* Checkbox */
+
+        li.querySelector("input")
+        .addEventListener(
+            "change",
+            (e)=>{
+
+                todo.completed =
+                e.target.checked;
+
+                saveTodos();
+
+                renderTodos();
+
+            }
+        );
+
+        /* Delete */
+
+        li.querySelector(".todo-delete")
+        .addEventListener(
+            "click",
+            ()=>{
+
+                todos =
+                todos.filter(
+                    t=>t.id!==todo.id
+                );
+
+                saveTodos();
+
+                renderTodos();
+
+            }
+        );
+
+        todoList.appendChild(li);
+
+    });
+
+}
+
+/* ==========================================
+   EVENTS
+========================================== */
+
 addTodoBtn?.addEventListener(
     "click",
     addTodo
 );
 
 todoInput?.addEventListener(
-    "keypress",
+    "keydown",
     (e)=>{
 
         if(e.key==="Enter"){
@@ -3744,73 +3921,11 @@ todoInput?.addEventListener(
     }
 );
 
-function addTodo(){
+/* ==========================================
+   INIT
+========================================== */
 
-    const text =
-    todoInput.value.trim();
-
-    if(!text)
-        return;
-
-    const li =
-    document.createElement("li");
-
-    li.className =
-    "todo-item";
-
-    li.innerHTML = `
-
-        <div class="todo-left">
-
-            <input
-                type="checkbox"
-                class="todo-check">
-
-            <span class="todo-text">
-                ${text}
-            </span>
-
-        </div>
-
-        <button
-            class="todo-delete">
-            🗑
-        </button>
-
-    `;
-
-    const checkbox =
-    li.querySelector(".todo-check");
-
-    const todoText =
-    li.querySelector(".todo-text");
-
-    checkbox.addEventListener(
-        "change",
-        ()=>{
-
-            todoText.classList.toggle(
-                "done",
-                checkbox.checked
-            );
-
-        }
-    );
-
-    li.querySelector(".todo-delete")
-    .addEventListener(
-        "click",
-        ()=>{
-
-            li.remove();
-
-        }
-    );
-
-    todoList.appendChild(li);
-
-    todoInput.value="";
-
-    todoInput.focus();
-
-}
+document.addEventListener(
+    "DOMContentLoaded",
+    loadTodos
+);
