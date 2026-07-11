@@ -3713,3 +3713,104 @@ createMemoryCard(entry)
   wire("polaroidBtn", "🔳 Add a Polaroid", buildPolaroidBody);
 })();
 
+/* ==========================
+   TODAY TODO
+========================== */
+
+const todoInput =
+document.getElementById("todoInput");
+
+const addTodoBtn =
+document.getElementById("addTodoBtn");
+
+const todoList =
+document.getElementById("todoList");
+
+addTodoBtn?.addEventListener(
+    "click",
+    addTodo
+);
+
+todoInput?.addEventListener(
+    "keypress",
+    (e)=>{
+
+        if(e.key==="Enter"){
+
+            addTodo();
+
+        }
+
+    }
+);
+
+function addTodo(){
+
+    const text =
+    todoInput.value.trim();
+
+    if(!text)
+        return;
+
+    const li =
+    document.createElement("li");
+
+    li.className =
+    "todo-item";
+
+    li.innerHTML = `
+
+        <div class="todo-left">
+
+            <input
+                type="checkbox"
+                class="todo-check">
+
+            <span class="todo-text">
+                ${text}
+            </span>
+
+        </div>
+
+        <button
+            class="todo-delete">
+            🗑
+        </button>
+
+    `;
+
+    const checkbox =
+    li.querySelector(".todo-check");
+
+    const todoText =
+    li.querySelector(".todo-text");
+
+    checkbox.addEventListener(
+        "change",
+        ()=>{
+
+            todoText.classList.toggle(
+                "done",
+                checkbox.checked
+            );
+
+        }
+    );
+
+    li.querySelector(".todo-delete")
+    .addEventListener(
+        "click",
+        ()=>{
+
+            li.remove();
+
+        }
+    );
+
+    todoList.appendChild(li);
+
+    todoInput.value="";
+
+    todoInput.focus();
+
+}
